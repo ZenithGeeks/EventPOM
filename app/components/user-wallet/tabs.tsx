@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,28 +9,33 @@ import {
   DocumentTextIcon,
 } from "@heroicons/react/24/outline";
 
-const menuItems = [
-  { id: "settings", label: "User Settings", icon: UserIcon },
-  { id: "tickets", label: "Tickets", icon: TicketIcon },
-  { id: "applications", label: "Applications", icon: DocumentTextIcon },
+type SettingsTabProps = {
+  activeTab: string;
+  onTabChange: (tab: string) => void;
+};
+
+const TabItems = [
+  { id: 1, value: "Settings", icon: UserIcon },
+  { id: 2, value: "Tickets", icon: TicketIcon},
+  { id: 3, value: "Applications", icon: DocumentTextIcon },
 ];
 
-export default function SettingsTab() {
-  const [activeTab, setActiveTab] = useState<string>("settings");
-
+export default function SettingsTab({ activeTab, onTabChange }: SettingsTabProps) {
   return (
-    // Let the card take full width on small screens, then 15rem on md+ if you want
-    <Card className="w-[18rem] md:w-[15rem]">
-      <ul className="space-y-2 py-3 pr-[4rem]">
-        {menuItems.map((item) => (
-          <li key={item.id}>
+    <Card className="w-full md:w-[15rem]">
+      <ul className="flex flex-row justify-around md:flex-col md:space-y-2">
+        {TabItems.map((item) => (
+          <li key={item.id} className="flex-1">
             <Button
-              variant={activeTab === item.id ? "default" : "ghost"}
-              className="w-full justify-start gap-2"
-              onClick={() => setActiveTab(item.id)}
+              variant={activeTab === item.value ? "content" : "ghost"}
+              className="justify-start gap-2 w-full md:w-[11rem]"
+              asChild
+              onClick={() => onTabChange(item.value)}
             >
-              <item.icon className="w-5 h-5" />
-              <span>{item.label}</span>
+              <div className="flex items-center gap-2">
+                  <item.icon className="w-5 h-5" />
+                  <span>{item.value}</span>
+                </div>
             </Button>
           </li>
         ))}
