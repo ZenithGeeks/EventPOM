@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar";
+import { SessionProvider } from "next-auth/react"
 
 const Poppinsfont = Poppins({subsets: ["latin"], weight: "500"});
 
@@ -22,8 +23,11 @@ export default function RootLayout({
       <body
         className={`${Poppinsfont} antialiased`}
       >
-        <Navbar/>
+         <SessionProvider >
+              <Navbar />
         {children}
+         </SessionProvider>
+    
       </body>
     </html>
   );
