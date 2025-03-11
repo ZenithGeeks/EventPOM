@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 interface PosterUploadProps {
-  picture?: File;
+  picture?: File | null;
   setPicture: (file: File) => void;
 }
 
