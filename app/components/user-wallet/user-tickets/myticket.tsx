@@ -8,7 +8,6 @@ import Image from "next/image";
 interface event {
   eventId: string;
   title: string;
-  description: string;
   startTime: string;
   endTime: string;
   location: string;
@@ -64,6 +63,19 @@ export default function MyTicket() {
     return <div className="p-4 text-center">Loading tickets...</div>;
   }
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23" // Use 24-hour format
+    }).format(date);
+  };
+  
+
   return (
     <div className="p-4 md:p-6 bg-white">
       <h2 className="text-2xl font-bold text-gray-900">Tickets</h2>
@@ -118,7 +130,7 @@ export default function MyTicket() {
                       {/* Date with calendar icon */}
                       <p className="flex items-center gap-1 text-sm text-gray-600">
                         <CalendarDaysIcon className="h-4 w-4" />
-                        {new Date(ticket.event.startTime).toLocaleString()} - {new Date(ticket.event.endTime).toLocaleString()}
+                        {formatDate(ticket.event.startTime)} - {formatDate(ticket.event.endTime)}
                       </p>
 
                       {/* Location with map-pin icon */}
@@ -160,7 +172,7 @@ export default function MyTicket() {
                     <h3 className="font-semibold text-lg">{ticket.event.title}</h3>
                     <p className="flex items-center gap-1 text-sm text-gray-600">
                       <CalendarDaysIcon className="h-4 w-4" />
-                      {new Date(ticket.event.startTime).toLocaleString()} - {new Date(ticket.event.endTime).toLocaleString()}
+                      {formatDate(ticket.event.startTime)} - {formatDate(ticket.event.endTime)}
                     </p>
                     <p className="flex items-center gap-1 text-sm text-gray-600">
                       <MapPinIcon className="h-4 w-4" />
