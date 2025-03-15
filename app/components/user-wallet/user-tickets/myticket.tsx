@@ -5,61 +5,64 @@ import { Button } from "@/components/ui/button";
 import { CalendarDaysIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 
-type TicketEvent = {
-  id: number;
+interface event {
+  eventId: string;
   title: string;
-  dateRange: string;
+  description: string;
+  startTime: string;
+  endTime: string;
   location: string;
   imageUrl: string;
-  endDate: string;
+}
+
+interface TicketEvent  {
+  ticketId: number;
+  event: event,
+  imageUrl: string;
 };
 
 export default function MyTicket() {
   const [activeTab, setActiveTab] = useState<"active" | "past">("active");
   const [events, setEvents] = useState<TicketEvent[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    setEvents([
-      {
-        id: 1,
-        title: "Pepsi presents S2O Songkran Music Festival 2025",
-        dateRange: "22 Apr 2025, 19:00 - 23 Apr 2025, 23:59",
-        location: "Rajamangala National Stadium, Bangkok, Thailand",
-        imageUrl: "/pepsi.png",
-        endDate: "2025-04-23T23:59:00",
-      },
-      {
-        id: 2,
-        title: "Infinity Saga Concert Experience",
-        dateRange: "5 Mar 2025, 18:00 - 6 Mar 2025, 00:00",
-        location: "Prince Mahidol Hall, Nakhon Pathom, Thailand",
-        imageUrl: "/marvel.png",
-        endDate: "2025-03-06T00:00:00",
-      },
-      {
-        id: 3,
-        title: "Thai Pomeranian Club Championship Dog Show 2024",
-        dateRange: "28 Sep 2024,11:00 -  29 Sep 2024, 21:00",
-        location: "Central Bangna Hall",
-        imageUrl: "/dogshow.png",
-        endDate: "2024-09-29T23:59:00",
-      },
-    ]);
+    async function fetchTickets() {
+      try {
+        const response = await fetch("/api/tickets"); 
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const originalData = await response.json(); 
+        const rawTickets = originalData.data;
+        console.log(rawTickets);
+        setEvents(rawTickets);
+      } catch (error) {
+        console.error("Error fetching tickets:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchTickets();
   }, []);
 
   const now = new Date();
-
-  const isValidDate = (date: string | number | Date) => !isNaN(new Date(date).getTime());
+  const isValidDate = (date: string) => !isNaN(new Date(date).getTime());
 
   const activeTickets = events.filter((event) => {
-    if (!isValidDate(event.endDate)) return false;
-    return new Date(event.endDate).getTime() >= now.getTime();
+    if (!isValidDate(event.event.endTime)) return false;
+    return new Date(event.event.endTime).getTime() >= now.getTime();
   });
 
   const pastTickets = events.filter((event) => {
-    if (!isValidDate(event.endDate)) return false;
-    return new Date(event.endDate).getTime() < now.getTime();
+    if (!isValidDate(event.event.endTime)) return false;
+    return new Date(event.event.endTime).getTime() < now.getTime();
   });
+
+  if (loading) {
+    return <div className="p-4 text-center">Loading tickets...</div>;
+  }
 
   return (
     <div className="p-4 md:p-6 bg-white">
@@ -96,36 +99,36 @@ export default function MyTicket() {
               <div className="space-y-4 text-left">
                 {activeTickets.map((ticket) => (
                   <div
-                    key={ticket.id}
+                    key={ticket.ticketId}
                     className="flex flex-col md:flex-row items-start gap-10 border p-4"
                   >
                     {/* Event image */}
                     <Image
-                      src={ticket.imageUrl}
+                      src={ticket.event.imageUrl}
                       width={150}
                       height={50}
-                      alt={ticket.title}
+                      alt={ticket.event.title}
                       className="object-cover"
                     />
 
                     {/* Event details + button */}
                     <div className="flex-1 space-y-4">
-                      <h3 className="font-semibold text-lg">{ticket.title}</h3>
+                      <h3 className="font-semibold text-lg">{ticket.event.title}</h3>
 
                       {/* Date with calendar icon */}
                       <p className="flex items-center gap-1 text-sm text-gray-600">
                         <CalendarDaysIcon className="h-4 w-4" />
-                        {ticket.dateRange}
+                        {new Date(ticket.event.startTime).toLocaleString()} - {new Date(ticket.event.endTime).toLocaleString()}
                       </p>
 
                       {/* Location with map-pin icon */}
                       <p className="flex items-center gap-1 text-sm text-gray-600">
                         <MapPinIcon className="h-4 w-4" />
-                        {ticket.location}
+                        {ticket.event.location}
                       </p>
 
                       {/* Button under the details */}
-                      <Button variant={"content"}>View details</Button>
+                      <Button variant="content">View details</Button>
                     </div>
                   </div>
                 ))}
@@ -136,35 +139,35 @@ export default function MyTicket() {
                   You haven&apos;t bought any ticket
                 </p>
                 <p className="text-gray-500">Click here to view events</p>
-                <Button className="mt-4">View events</Button>
+                <Button variant="content">View event</Button>
               </>
             )
           ) : pastTickets.length > 0 ? (
             <div className="space-y-4 text-left">
               {pastTickets.map((ticket) => (
                 <div
-                  key={ticket.id}
+                  key={ticket.ticketId}
                   className="flex flex-col md:flex-row items-start gap-10 border p-4"
                 >
                   <Image
-                    src={ticket.imageUrl}
+                    src={ticket.event.imageUrl}
                     width={150}
                     height={150}
-                    alt={ticket.title}
+                    alt={ticket.event.title}
                     className="object-cover"
                   />
                   <div className="flex-1 space-y-4">
-                    <h3 className="font-semibold text-lg">{ticket.title}</h3>
+                    <h3 className="font-semibold text-lg">{ticket.event.title}</h3>
                     <p className="flex items-center gap-1 text-sm text-gray-600">
                       <CalendarDaysIcon className="h-4 w-4" />
-                      {ticket.dateRange}
+                      {new Date(ticket.event.startTime).toLocaleString()} - {new Date(ticket.event.endTime).toLocaleString()}
                     </p>
                     <p className="flex items-center gap-1 text-sm text-gray-600">
                       <MapPinIcon className="h-4 w-4" />
-                      {ticket.location}
+                      {ticket.event.location}
                     </p>
 
-                    <Button variant={"content"}>View details</Button>
+                    <Button variant="content">View details</Button>
                   </div>
                 </div>
               ))}
