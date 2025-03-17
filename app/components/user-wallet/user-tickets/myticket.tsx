@@ -14,7 +14,7 @@ export interface event {
   imageUrl: string;
 }
 
-interface TicketEvent  {
+export interface TicketEvent  {
   ticketId: number;
   event: event,
   imageUrl: string;
