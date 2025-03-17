@@ -5,7 +5,7 @@ import Image from "next/image";
 import SettingsTab from "../components/user-wallet/tabs";
 import MyTicket from "../components/user-wallet/user-tickets/myticket";
 import { useSession } from "next-auth/react";
-
+import ApplicationBox from "../components/ApplicationBox";
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("Tickets");
   const { data: session } = useSession();
@@ -35,7 +35,7 @@ export default function SettingsPage() {
       <main className="flex-1 p-4 md:pr-16">
         {activeTab === "Settings" && <div>User Settings</div>}
         {activeTab === "Tickets" && <MyTicket />}
-        {activeTab === "Applications" && <div>Applications Content</div>}
+        {activeTab === "Applications" && <ApplicationBox/>}
       </main>
     </div>
   );

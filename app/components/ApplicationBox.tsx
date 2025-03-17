@@ -1,41 +1,84 @@
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/ui/badge";
 import { CalendarDaysIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import { TicketEvent } from '../components/user-wallet/user-tickets/myticket'
+import { event } from "../components/user-wallet/user-tickets/myticket";
+//import { promises as fs} from 'fs'
 
-export type ApplicationInfo =  TicketEvent &
-{
-    eventCategory:string
-    status:'Denied' | 'In progress' | 'Approved'
-}
+export type ApplicationInfo = event & {
+  eventCategory: string;
+  status: "Denied" | "In progress" | "Approved";
+};
 
 const ApplicationBox = () => {
-  const [activeTab,setActiveTab] = useState<'current' | 'past'>('current')
-  
+  const [activeTab, setActiveTab] = useState<"current" | "past">("current");
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+
+    const options: Intl.DateTimeFormatOptions = {
+      year: "numeric",
+      month: "short", // Use 'short' for abbreviated month names (e.g., "Apr" for April)
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false, // Use 24-hour format
+    };
+
+    const formattedDate = date
+      .toLocaleString("en-GB", options)
+      .replace(",", ""); // UK locale provides the desired format
+    return formattedDate;
+  };
+
   const applications: ApplicationInfo[] = [
     {
-      id: 1,
+      eventId: "EVENT001",
       title: "Pepsi presents S2O Songkran Music Festival 2025",
-      dateRange: "22 Apr 2025, 19:00 - 23 Apr 2025, 23:59",
+      startTime: "2025-04-22T19:00:00",
+      endTime: "2025-04-23T23:59:00",
       location: "Rajamangala National Stadium, Bangkok, Thailand",
       imageUrl: "/pepsi.png",
-      eventCategory:'Music Festival',
-      status:'Approved'
+      eventCategory: "Music Festival",
+      status: "In progress",
     },
     {
-      id: 2,
+      eventId: "EVENT002",
       title: "Infinity Saga Concert Experience",
-      dateRange: "5 Mar 2025, 18:00 - 6 Mar 2025, 00:00",
+      startTime: "2025-03-05T18:00:00",
+      endTime: "2025-03-06T00:00:00",
       location: "Prince Mahidol Hall, Nakhon Pathom, Thailand",
       imageUrl: "/marvel.png",
-      eventCategory:'Concert',
-      status:'Denied'
+      eventCategory: "Concert",
+      status: "Denied",
+    },
+    {
+      eventId: "EVENT003",
+      title: "Thai Pomeranian Club Championship Dog Show 2024",
+      startTime: "2024-09-28T11:00:00",
+      endTime: "2024-09-29T21:00:00",
+      location: "Central Bangna Hall, Bangkok, Thailand",
+      imageUrl: "/dogshow.png",
+      eventCategory: "Dog Show",
+      status: "Approved",
     },
   ];
 
-  const currentApplication = applications.filter(application => application.status === 'In progress')
-  const pastApplication = applications.filter(application => application.status === 'Approved' || application.status === 'Denied')
+  const currentApplication = applications.filter((application) => {
+    const currentDate = new Date();
+    const startTime = new Date(application.startTime);
+    const endTime = new Date(application.endTime);
+    return (
+      currentDate < startTime ||
+      (currentDate >= startTime && currentDate <= endTime)
+    );
+  });
+
+  const pastApplication = applications.filter((application) => {
+    const currentDate = new Date();
+    const endTime = new Date(application.endTime);
+    return currentDate > endTime;
+  });
 
   return (
     <div className="p-4 md:p-6 bg-white">
@@ -70,7 +113,7 @@ const ApplicationBox = () => {
               <div className="space-y-4 text-left">
                 {currentApplication.map((application) => (
                   <div
-                    key={application.id}
+                    key={application.eventId}
                     className="flex flex-col md:flex-row items-start gap-10 border rounded-lg p-4 w-full"
                   >
                     {/* Event image */}
@@ -84,20 +127,35 @@ const ApplicationBox = () => {
 
                     {/* Event details + button */}
                     <div className="flex-1 space-y-1">
-                      <h3 className="font-semibold text-lg">{application.title}</h3>
+                      <h3 className="font-semibold text-lg">
+                        {application.title}
+                      </h3>
                       <p className="text-sm">{application.eventCategory}</p>
                       {/* Date with calendar icon */}
                       <p className="flex items-center gap-1 text-sm text-gray-600 ">
                         <CalendarDaysIcon className="h-4 w-4 " />
-                        {application.dateRange}
+                        {formatDate(application.startTime)} -{" "}
+                        {formatDate(application.endTime)}
                       </p>
-                      
                       {/* Location with map-pin icon */}
                       <p className="flex items-center gap-1 text-sm text-gray-600">
                         <MapPinIcon className="h-4 w-4" />
                         {application.location}
                       </p>
-                      <Badge className='border-yellow-400 text-yellow-400 rounded-none' variant={"outline"}>{application.status}</Badge>
+                      <Badge
+                        className={`rounded-none ${
+                          application.status === "Approved"
+                            ? "border-green-600 text-green-600"
+                            : application.status === "Denied"
+                            ? "border-red-800 text-red-800"
+                            : application.status === "In progress"
+                            ? "border-yellow-400 text-yellow-400"
+                            : ""
+                        }`}
+                        variant={"outline"}
+                      >
+                        {application.status}
+                      </Badge>
                     </div>
                   </div>
                 ))}
@@ -108,15 +166,16 @@ const ApplicationBox = () => {
                   You don't have any applications
                 </p>
                 <p className="text-gray-500">
-              When you apply for any event, you can track your application status here.
-              </p>
+                  When you apply for any event, you can track your application
+                  status here.
+                </p>
               </>
             )
           ) : pastApplication.length > 0 ? (
             <div className="space-y-4 text-left">
               {pastApplication.map((application) => (
                 <div
-                  key={application.id}
+                  key={application.eventId}
                   className="flex flex-col md:flex-row items-start gap-4 border rounded-lg p-4  w-full"
                 >
                   <Image
@@ -127,32 +186,51 @@ const ApplicationBox = () => {
                     className="object-cover"
                   />
                   <div className="flex-1 space-y-1">
-                    <h3 className="font-semibold text-lg">{application.title}</h3>
+                    <h3 className="font-semibold text-lg">
+                      {application.title}
+                    </h3>
                     <p className="text-sm">{application.eventCategory}</p>
                     <p className="flex items-center gap-1 text-sm text-gray-600">
                       <CalendarDaysIcon className="h-4 w-4" />
-                      {application.dateRange}
+                      {formatDate(application.startTime)} -{" "}
+                      {formatDate(application.endTime)}
                     </p>
                     <p className="flex items-center gap-1 text-sm text-gray-600">
                       <MapPinIcon className="h-4 w-4" />
                       {application.location}
                     </p>
-                    <Badge className={`rounded-none ${application.status === 'Approved' ? 'border-green-600 text-green-600' : 'border-red-800 text-red-800'}`} variant={'outline'}>{application.status}</Badge>
+                    <Badge
+                      className={`rounded-none ${
+                        application.status === "Approved"
+                          ? "border-green-600 text-green-600"
+                          : application.status === "Denied"
+                          ? "border-red-800 text-red-800"
+                          : application.status === "In progress"
+                          ? "border-yellow-400 text-yellow-400"
+                          : ""
+                      }`}
+                      variant={"outline"}
+                    >
+                      {application.status}
+                    </Badge>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
             <>
-              <p className="text-lg font-semibold">You don't have any past applications</p>
+              <p className="text-lg font-semibold">
+                You don't have any past applications
+              </p>
               <p className="text-gray-500">
-              When you apply for any event, you can track your application status here.
+                When you apply for any event, you can track your application
+                status here.
               </p>
             </>
           )}
         </div>
       </div>
-  </div>
+    </div>
   );
 };
 
