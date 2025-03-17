@@ -109,7 +109,7 @@ export default function MyTicket() {
             ) : (
               <>
                 <p className="text-lg font-semibold">
-                  You haven't bought any ticket
+                  You haven&apos;t bought any ticket
                 </p>
                 <p className="text-gray-500">Click here to view events</p>
                 <Button className="mt-4">View events</Button>
@@ -147,7 +147,7 @@ export default function MyTicket() {
             <>
               <p className="text-lg font-semibold">No past tickets found</p>
               <p className="text-gray-500">
-                You haven't attended any events yet
+                You haven&apos;t attended any events yet
               </p>
             </>
           )}

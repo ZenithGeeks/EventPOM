@@ -5,12 +5,13 @@ import PosterUpload from "./PosterUpload";
 import EventDetailsForm from "./EventDetailsForm";
 import TicketsForm from "./TicketsForm";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Event, EventStatus } from "@/types/models"; // Import type definitions
 
 export default function CreateEventForm() {
   const [date, setDate] = useState<Date>();
   const [picture, setPicture] = useState<File | null>(null);
+  const [tag, setTag] = useState<string>("");
   const [eventData, setEventData] = useState<
     Omit<Event, "id" | "createdAt" | "application">
   >({
@@ -24,11 +25,19 @@ export default function CreateEventForm() {
     organizerId: "",
     tickets: [],
     orders: [],
+    eventCategory: ""
   });
+  
+  useEffect(() => {
+    setEventData((prevEventData) => ({
+      ...prevEventData,
+      eventCategory: tag,
+      imageUrl: picture ? URL.createObjectURL(picture) : "",
+    }));
+  }, [tag, picture]);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-
     try {
       const formattedData: Omit<Event, "id" | "createdAt"> = {
         ...eventData,
@@ -73,7 +82,7 @@ export default function CreateEventForm() {
           <PosterUpload picture={picture} setPicture={setPicture} />
         </div>
         <div className="flex flex-col gap-8 w-full pt-2">
-          <EventDetailsForm date={date} setDate={setDate} />
+          <EventDetailsForm date={date} setDate={setDate}  setTag={setTag}/>
           <TicketsForm />
         </div>
       </div>

@@ -27,13 +27,14 @@ import { Label } from "@/components/ui/label";
 interface EventDetailsFormProps {
   date?: Date;
   setDate: (date: Date) => void;
+  setTag: (tag: string) => void;
 }
 
 const EventDetailsForm: React.FC<EventDetailsFormProps> = ({
   date,
   setDate,
+  setTag,
 }) => {
-  const [selectedTag, setSelectedTag] = React.useState<string>("");
   const tags = ["technology", "education", "science", "talk show"];
 
   return (
@@ -78,7 +79,7 @@ const EventDetailsForm: React.FC<EventDetailsFormProps> = ({
       <div className="flex flex-col md:flex-row gap-4 w-full">
         <div className="flex flex-col gap-2 w-full md:w-1/2">
           <Label className="font-bold">Event Tag</Label>
-          <Select onValueChange={(value) => setSelectedTag(value)}>
+          <Select onValueChange={(value) => setTag(value)}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select tag" />
             </SelectTrigger>

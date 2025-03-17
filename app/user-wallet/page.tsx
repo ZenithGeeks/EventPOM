@@ -9,7 +9,7 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("Tickets");
   
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-white">
+    <div className="flex flex-col md:flex-row min-h-screen min-w-screen bg-white">
 
       <aside className="w-full md:w-[25rem] bg-white pt-4 flex flex-col items-center">
         <div className="mb-4">

@@ -65,14 +65,13 @@ export interface Organizer {
 export interface EventCategory {
   id: string;
   name: string;
-  events: Event[];
 }
 
 export interface Event {
   id: string;
   title: string;
   typeId: string;
-  eventCategory?: EventCategory;
+  eventCategory?: string;
   description: string;
   location: string;
   imageUrl?: string;
