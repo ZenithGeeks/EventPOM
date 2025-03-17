@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { CalendarDaysIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 
-type TicketEvent = {
+export type TicketEvent = {
   id: number;
   title: string;
   dateRange: string;
