@@ -65,14 +65,13 @@ export interface Organizer {
 export interface EventCategory {
   id: string;
   name: string;
-  events: Event[];
 }
 
 export interface Event {
   id: string;
   title: string;
   typeId: string;
-  eventCategory: EventCategory;
+  eventCategory?: string;
   description: string;
   location: string;
   imageUrl?: string;
@@ -80,9 +79,9 @@ export interface Event {
   endTime: Date;
   status: EventStatus;
   organizerId: string;
-  organizer: Organizer;
-  tickets: Ticket[];
-  orders: Order[];
+  organizer?: Organizer;
+  tickets?: Ticket[];
+  orders?: Order[];
   application?: EventApplication;
   applicationId?: string;
   createdAt: Date;

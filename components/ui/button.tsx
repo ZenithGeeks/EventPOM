@@ -10,22 +10,22 @@ const buttonVariants = cva(
     variants: {
       variant: {
         content:
-          "bg-[#2A2A6D] text-primary-foreground shadow ",
+          "bg-[#2A2A6D] text-primary-foreground shadow",
         default:
-          "bg-primary text-primary-foreground shadow ",
+          "bg-primary text-primary-foreground shadow",
         destructive:
-          "bg-destructive text-destructive-foreground shadow-sm ",
+          "bg-destructive text-destructive-foreground shadow-sm",
         outline:
-          "border border-input bg-background shadow-sm hover:bg-accent ",
+          "border border-input bg-background shadow-sm hover:bg-accent",
         secondary:
-          "bg-secondary text-secondary-foreground shadow-sm ",
+          "bg-secondary text-secondary-foreground shadow-sm",
         ghost: "hover:bg-accent ",
-        link: "text-primary underline-offset-4 ",
+        link: "text-primary underline-offset-4",
       },
       size: {
         default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-10 rounded-md px-8",
+        sm: "h-8  px-3 text-xs",
+        lg: "h-10  px-8",
         icon: "h-9 w-9",
       },
     },

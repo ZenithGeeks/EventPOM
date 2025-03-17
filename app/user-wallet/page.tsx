@@ -11,8 +11,7 @@ export default function SettingsPage() {
   const { data: session } = useSession();
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-white pt-[6rem]">
-
+    <div className="flex flex-col md:flex-row bg-white">
       <aside className="w-full md:w-[25rem] bg-white pt-4 flex flex-col items-center">
         <div className="mb-4">
           {session?.user ? (
