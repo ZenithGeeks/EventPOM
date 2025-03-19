@@ -101,6 +101,7 @@ export interface EventApplication {
 }
 
 export interface Ticket {
+  ticket: Ticket;
   id: string;
   name: string;
   seat?: string;
