@@ -3,7 +3,8 @@ import { CalendarDateRangeIcon, MapPinIcon, ShoppingCartIcon } from "@heroicons/
 import { data } from './data'
 import Add from "../components/buyTicketsPage/addToWishlist"
 import Purchase from "../components/buyTicketsPage/purchase"
-
+import TicketListTable from "../components/buyTicketsPage/tickets-list-table"
+import tickets from './tickets.json'
 export default function Buy() {
     const posters = [
         {
@@ -60,7 +61,8 @@ export default function Buy() {
                 </div>
             </div>
             <div className="flex mb-[100px] space-x-[60px]">
-                <div className="border-primaryColor border-[1px] rounded-[3px] w-[600px] h-[500px]"></div>
+                {/* New Component */}
+               <TicketListTable Tickets={tickets}/>  
                 <div className="flex-grow space-y-[15px]">
                     <div className="border-borderColor border-[1px] p-[30px] h-fit rounded-[3px] space-y-[25px]">
                         <div className="flex items-center space-x-[6px]">
