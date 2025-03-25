@@ -11,8 +11,7 @@ export default function Page() {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchSubmitted, setSearchSubmitted] = useState(false);
-  //const [loading, setLoading] = useState(false);
-  //const [error, setError] = useState(null);
+
   const [data,setData] = useState<any>([])
   // Sample events data (Replace this with real API data later)
   const [events, setEvents] = useState([
@@ -62,29 +61,6 @@ export default function Page() {
     fetchData();
     return () => clearTimeout(handler);
   }, [searchTerm]);
-
-  /*
-      // Fetch events from the backend
-      useEffect(() => {
-        const fetchEvents = async () => {
-          setLoading(true);
-          setError(null);
-          try {
-            const response = await fetch("/api/events"); // Replace this with real API
-            if (!response.ok) {
-              throw new Error("Failed to fetch events");
-            }
-            const data = await response.json();
-            setEvents(data);
-          } catch (err) {
-            setError(err.message);
-          } finally {
-            setLoading(false);
-          }
-        };
-        fetchEvents();
-      }, []);
-  */
 
   //regex search
   const filteredEvents = searchTerm
@@ -208,11 +184,11 @@ export default function Page() {
 
               {/* Event Details */}
               <div className="p-2">
-                <h3 className="text-sm font-semibold text-gray-800">{data.title}</h3>
-                <p className="text-xs text-gray-500">{new Date(data.startTime).toLocaleDateString()}</p>
+                <h3 className="text-base font-semibold text-gray-800">{data.title}</h3>
+                <p className="text-sm text-gray-500">{new Date(data.startTime).toLocaleDateString()}</p>
                 <div className="flex items-center space-x-1 mt-1">
                   <MapPinIcon className="w-4 h-4 text-white stroke-gray-500" />
-                  <p className="text-xs text-gray-600">{data.location}</p>
+                  <p className="text-sm text-gray-600">{data.location}</p>
                 </div>
               </div>
             </div>
