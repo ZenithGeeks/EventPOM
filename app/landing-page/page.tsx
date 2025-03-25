@@ -13,10 +13,10 @@ export default function Page() {
   const [searchSubmitted, setSearchSubmitted] = useState(false);
   //const [loading, setLoading] = useState(false);
   //const [error, setError] = useState(null);
-
+  const [data,setData] = useState<any>([])
   // Sample events data (Replace this with real API data later)
   const [events, setEvents] = useState([
-    { id: 1, title: "Music Festival", location: "New York", date: "2025-04-10", image: "/images/event1.jpg" },
+    { id: 1, title: "Music Festival", location: "New York", date: "2025-04-10", image: "http://localhost:9000/eventpom-bucket/g6glWQ3NA3ddRVaYc9tY.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=cvZyrkt2huShNXglI1x4%2F20250325%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250325T091611Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=e5e8ce1daa1869b04943fa11c4af2f83479137f2e86cdda306651e917bcc9e0d" },
     { id: 2, title: "Tech Conference", location: "San Francisco", date: "2025-05-15", image: "/images/event2.png" },
     { id: 3, title: "Art Exhibition", location: "Paris", date: "2025-06-20", image: "/images/event3.jpg" },
     { id: 4, title: "Food Fair", location: "Tokyo", date: "2025-07-05", image: "/images/event4.jpg" },
@@ -44,6 +44,22 @@ export default function Page() {
       setDebouncedSearchTerm(searchTerm);
     }, 300);
 
+    const fetchData = async () => {
+      try {
+        const res = await fetch("/api/getEvent");
+        const result = await res.json();
+        console.log(result.events)
+        if (!res.ok) {
+          throw new Error(result.error || "An unknown error occurred");
+        }
+
+        setData(result.events);
+      } catch (err) {
+        console.log(err)
+      }
+    };
+
+    fetchData();
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
@@ -159,7 +175,7 @@ export default function Page() {
         {/* Search Suggestions */}
         {showSuggestions && searchTerm && (
           <ul className="absolute z-10 bg-white shadow-lg rounded-md top-6 w-full max-w-2xl mx-auto text-center left-1/2 transform -translate-x-1/2">
-            {filteredEvents.slice(0, 5).map((event) => (
+            {data?.slice(0, 5).map((event:any) => (
               <li
                 key={event.id}
                 className="px-4 py-2 cursor-pointer hover:bg-gray-200"
@@ -177,13 +193,13 @@ export default function Page() {
       {/*Events*/}
       <section className="flex items-center justify-center mt-12">
         <div className="grid grid-cols-2 md:grid-cols-6 gap-4 md:gap-14">
-          {filteredEvents.map((event) => (
-            <div key={event.id} className="w-full m-4 bg-white overflow-hidden">
+          {data?.map((data:any) => (
+            <div key={data.id} className="w-full m-4 bg-white overflow-hidden">
               {/* Event Image */}
               <div className="relative w-full aspect-[2/3]">
                 <Image
-                  src={event.image}
-                  alt={event.title}
+                  src={data.imageUrl}
+                  alt={data.title}
                   layout="fill"
                   objectFit="cover"
                   className="w-full h-full object-cover"
@@ -192,11 +208,11 @@ export default function Page() {
 
               {/* Event Details */}
               <div className="p-2">
-                <h3 className="text-sm font-semibold text-gray-800">{event.title}</h3>
-                <p className="text-xs text-gray-500">{event.date}</p>
+                <h3 className="text-sm font-semibold text-gray-800">{data.title}</h3>
+                <p className="text-xs text-gray-500">{new Date(data.startTime).toLocaleDateString()}</p>
                 <div className="flex items-center space-x-1 mt-1">
                   <MapPinIcon className="w-4 h-4 text-white stroke-gray-500" />
-                  <p className="text-xs text-gray-600">{event.location}</p>
+                  <p className="text-xs text-gray-600">{data.location}</p>
                 </div>
               </div>
             </div>
