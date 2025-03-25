@@ -158,7 +158,7 @@ export default function Page() {
 
         {/* Search Suggestions */}
         {showSuggestions && searchTerm && (
-          <ul className="absolute bg-white shadow-lg rounded-md top-6 w-full max-w-2xl mx-auto text-center left-1/2 transform -translate-x-1/2">
+          <ul className="absolute z-10 bg-white shadow-lg rounded-md top-6 w-full max-w-2xl mx-auto text-center left-1/2 transform -translate-x-1/2">
             {filteredEvents.slice(0, 5).map((event) => (
               <li
                 key={event.id}
@@ -175,10 +175,10 @@ export default function Page() {
         )}
       </div>
       {/*Events*/}
-      <section className="mt-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2">
+      <section className="flex items-center justify-center mt-12">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4 md:gap-14">
           {filteredEvents.map((event) => (
-            <div key={event.id} className="w-[180px] bg-white shadow-md overflow-hidden">
+            <div key={event.id} className="w-full m-4 bg-white overflow-hidden">
               {/* Event Image */}
               <div className="relative w-full aspect-[2/3]">
                 <Image
