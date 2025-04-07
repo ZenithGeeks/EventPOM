@@ -7,7 +7,8 @@ import { event } from "../components/user-wallet/user-tickets/myticket";
 
 export type ApplicationInfo = event & {
   eventCategory: string;
-  status: "Denied" | "In progress" | "Approved";
+  status: "Denied" | "Pending" | "Approved";
+  createdAt: string
 };
 
 const ApplicationBox = () => {
@@ -25,10 +26,9 @@ const ApplicationBox = () => {
       hour12: false, // Use 24-hour format
     };
 
-    const formattedDate = date
-      .toLocaleString("en-GB", options)
-      .replace(",", ""); // UK locale provides the desired format
-    return formattedDate;
+    const formattedDate = date.toLocaleString("en-GB", options);
+    const [day, month, year, time] = formattedDate.split(" ");
+    return `${day} ${month} ${year} ${time}`;
   };
 
   const applications: ApplicationInfo[] = [
@@ -40,7 +40,8 @@ const ApplicationBox = () => {
       location: "Rajamangala National Stadium, Bangkok, Thailand",
       imageUrl: "/pepsi.png",
       eventCategory: "Music Festival",
-      status: "In progress",
+      status: "Pending",
+      createdAt: "2025-03-22T19:00:00"
     },
     {
       eventId: "EVENT002",
@@ -51,18 +52,16 @@ const ApplicationBox = () => {
       imageUrl: "/marvel.png",
       eventCategory: "Concert",
       status: "Denied",
-    },
-    {
-      eventId: "EVENT003",
-      title: "Thai Pomeranian Club Championship Dog Show 2024",
-      startTime: "2024-09-28T11:00:00",
-      endTime: "2024-09-29T21:00:00",
-      location: "Central Bangna Hall, Bangkok, Thailand",
-      imageUrl: "/dogshow.png",
-      eventCategory: "Dog Show",
-      status: "Approved",
-    },
+      createdAt: "2025-02-05T19:00:00"
+    }
   ];
+
+  
+  const calculatePendingDeadline = (createdAt: string) => {
+    const createdDate = new Date(createdAt);
+    createdDate.setDate(createdDate.getDate() + 7); // Add 7 days
+    return createdDate;
+  };
 
   const currentApplication = applications.filter((application) => {
     const currentDate = new Date();
@@ -142,13 +141,16 @@ const ApplicationBox = () => {
                         <MapPinIcon className="h-4 w-4" />
                         {application.location}
                       </p>
+                      {application.status === "Pending" && (
+                        <p className="text-sm text-gray-600">Review by:  {formatDate(calculatePendingDeadline(application.createdAt).toISOString())}</p>
+                      )}
                       <Badge
                         className={`rounded-none ${
                           application.status === "Approved"
                             ? "border-green-600 text-green-600"
                             : application.status === "Denied"
                             ? "border-red-800 text-red-800"
-                            : application.status === "In progress"
+                            : application.status === "Pending"
                             ? "border-yellow-400 text-yellow-400"
                             : ""
                         }`}
@@ -203,11 +205,7 @@ const ApplicationBox = () => {
                       className={`rounded-none ${
                         application.status === "Approved"
                           ? "border-green-600 text-green-600"
-                          : application.status === "Denied"
-                          ? "border-red-800 text-red-800"
-                          : application.status === "In progress"
-                          ? "border-yellow-400 text-yellow-400"
-                          : ""
+                          : "border-red-800 text-red-800"
                       }`}
                       variant={"outline"}
                     >
