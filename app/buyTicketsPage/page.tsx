@@ -1,3 +1,5 @@
+'use client'
+
 import Image from "next/image"
 import { CalendarDateRangeIcon, MapPinIcon, ShoppingCartIcon } from "@heroicons/react/24/outline"
 import { data } from './data'
@@ -5,7 +7,11 @@ import Add from "../components/buyTicketsPage/addToWishlist"
 import Purchase from "../components/buyTicketsPage/purchase"
 import TicketListTable from "../components/buyTicketsPage/tickets-list-table"
 import tickets from './tickets.json'
+import { useState, useEffect } from "react"
+import Script from "next/script"
+
 export default function Buy() {
+    const [loading, setLoading] = useState(false)
     const posters = [
         {
             id: 1,
@@ -32,8 +38,36 @@ export default function Buy() {
             height: [30, 30, 60, 100]
         }
     ]
-    const axios = require('axios')
-    const apiUrl = ''
+    const handleOmisePayment = async () => {
+        setLoading(true)
+        window.Omise.createToken('card', {
+            name: 'Jane Doe',
+            number: '4242424242424242',
+            expiration_month: 12,
+            expiration_year: 2025,
+            security_code: 123
+        }, async (statusCode: number, response: any) => {
+            if (response.object === 'token') {
+                const token = response.id
+                const res = await fetch('/api/charge', {
+                    method: 'POST',
+                    body: JSON.stringify({ token, amount: 2500 })
+                })
+                const result = await res.json()
+
+                if (result.success) {
+                    setLoading(false)
+                    alert('Payment successful')
+                } else {
+                    setLoading(false)
+                    alert('Payment failed')
+                }
+            } else {
+                setLoading(false)
+                alert('Token creation failed')
+            }
+        })
+    }
 
     return (
         <main className="pb-[6%] pt-[6%] px-[15%]">
@@ -61,8 +95,7 @@ export default function Buy() {
                 </div>
             </div>
             <div className="flex mb-[100px] space-x-[60px]">
-                {/* New Component */}
-               <TicketListTable Tickets={tickets}/>  
+                <TicketListTable Tickets={tickets} />
                 <div className="flex-grow space-y-[15px]">
                     <div className="border-borderColor border-[1px] p-[30px] h-fit rounded-[3px] space-y-[25px]">
                         <div className="flex items-center space-x-[6px]">
@@ -70,14 +103,17 @@ export default function Buy() {
                             <ShoppingCartIcon className="w-[25px] h-[25px]" />
                         </div>
                         <div className="flex items-center justify-between">
-                            <h1 className="font-bold text-[18px]">Early bird ticket</h1>
+                            <h1 className="font-bold text-[18px]">Early Bird Ticket</h1>
                             <h1 className="text-[18px]">1,700 baht x 1</h1>
                         </div>
                         <div className="flex items-center justify-between">
                             <h1 className="font-bold text-[18px]">Total</h1>
                             <h1 className="font-bold text-[18px]">1,700 baht</h1>
                         </div>
-                        <Purchase />
+                        <Purchase
+                            loading={loading}
+                            handle={handleOmisePayment}
+                        />
                     </div>
                     <h1 className="font-bold text-borderColor text-center text-[18px]">Acceptable payments</h1>
                     {payments.map((item) => (
@@ -113,6 +149,9 @@ export default function Buy() {
                     </div>
                 ))}
             </div>
+            <Script src="https://cdn.omise.co/omise.js" onLoad={() => {
+                window.Omise.setPublicKey('pkey_test_63061jt2j1wqegs9yvc')
+            }} />
         </main>
     )
 }

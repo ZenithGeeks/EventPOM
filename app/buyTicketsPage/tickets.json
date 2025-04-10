@@ -1,27 +1,34 @@
 [
     {
-      "id": "1",
-      "name": "Early Bird Ticket",
-      "description": "Discounted early access ticket for the event.",
-      "price": 1700,
-      "quantity": 50,
-      "status": "Available"
+        "id": "1",
+        "name": "Early Bird Ticket",
+        "description": "Discounted early access ticket for the event.",
+        "price": 1700,
+        "quantity": 50,
+        "status": "Available"
     },
     {
-      "id": "2",
-      "name": "VIP Ticket",
-      "description": "Premium ticket with exclusive access and perks.",
-      "price": 5000,
-      "quantity": 20,
-      "status": "Limited"
+        "id": "2",
+        "name": "General Admission",
+        "description": "Standard ticket for entry to the event.",
+        "price": 2500,
+        "quantity": 100,
+        "status": "Available"
     },
     {
-      "id": "3",
-      "name": "General Admission",
-      "description": "Standard ticket for entry to the event.",
-      "price": 2500,
-      "quantity": 100,
-      "status": "Available"
+        "id": "3",
+        "name": "VIP Ticket",
+        "description": "Premium ticket with exclusive access and perks.",
+        "price": 5000,
+        "quantity": 20,
+        "status": "Limited"
+    },
+    {
+        "id": "4",
+        "name": "VIP Premium Ticket",
+        "description": "Meet the organizer in person after the event.",
+        "price": 6000,
+        "quantity": 15,
+        "status": "Limited"
     }
-  ]
-  
+]
