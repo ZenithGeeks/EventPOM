@@ -178,7 +178,7 @@ const ApplicationBox = () => {
               {pastApplication.map((application) => (
                 <div
                   key={application.eventId}
-                  className="flex flex-col md:flex-row items-start gap-4 border rounded-lg p-4  w-full"
+                  className="flex flex-col md:flex-row items-start gap-10 border rounded-lg p-4 w-full"
                 >
                   <Image
                     src={application.imageUrl}
