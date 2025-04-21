@@ -1,38 +1,32 @@
-"use client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useState } from "react";
+"use client"
+import { Card, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import React, { useState } from "react"
 
 interface Ticket {
-    id: string;
-    name: string;
-    description: string;
-    price: number;
-    quantity: number;
-    status: string;
+    id: string
+    name: string
+    description: string
+    price: number
+    quantity: number
+    status: string
 }
 
 interface TicketListProps {
-    Tickets: Ticket[];
+    Tickets: Ticket[]
+    ticketCount: { [key: string]: number }
+    setTicketCount: React.Dispatch<React.SetStateAction<{ [key: string]: number }>>
 }
 
-export default function TicketList({ Tickets }: TicketListProps) {
-    const [ticketCounts, setTicketCounts] = useState<{ [key: string]: number }>(
-        Tickets?.reduce((acc, ticket) => {
-            acc[ticket.id] = 0;
-            return acc;
-        }, {} as { [key: string]: number })
-    );
-
+export default function TicketList({ Tickets, ticketCount, setTicketCount }: TicketListProps) {
     const increaseCount = (id: string) => {
-        setTicketCounts((prev) => ({ ...prev, [id]: prev[id] + 1 }));
-    };
+        setTicketCount((prev) => ({ ...prev, [id]: prev[id] + 1 }))
+    }
 
     const decreaseCount = (id: string) => {
-        setTicketCounts((prev) => ({ ...prev, [id]: Math.max(0, prev[id] - 1) }));
-    };
+        setTicketCount((prev) => ({ ...prev, [id]: Math.max(0, prev[id] - 1) }))
+    }
 
     return (
         <ScrollArea className="w-[600px] max-h-[500px] pr-[15px] rounded-[3px]">
@@ -45,7 +39,7 @@ export default function TicketList({ Tickets }: TicketListProps) {
                         <CardHeader className="flex justify-between items-start">
                             <CardTitle className="flex flex-row justify-between w-full gap-8">
                                 <div className="flex flex-col">
-                                    <p className="font-bold text-lg">{ticket.name}</p>
+                                    <p className="font-bold text-justify text-lg">{ticket.name}</p>
                                     <p className="text-sm text-gray-400 py-2">
                                         {ticket.description}
                                     </p>
@@ -53,7 +47,7 @@ export default function TicketList({ Tickets }: TicketListProps) {
 
                                 <div className="flex flex-col items-center justify-start">
                                     <span className="text-md font-bold mx-2">
-                                        {ticket.price} Baht.-
+                                        {ticket.price.toLocaleString()} Baht.-
                                     </span>
                                     <div className="mt-4 flex justify-between items-center">
                                         <div className="flex items-center gap-4">
@@ -64,8 +58,8 @@ export default function TicketList({ Tickets }: TicketListProps) {
                                             >
                                                 -
                                             </Button>
-                                            <span className="text-lg font-bold">
-                                                {ticketCounts[ticket.id]}
+                                            <span className="text-lg font-bold text-center w-[15px]">
+                                                {ticketCount[ticket.id]}
                                             </span>
                                             <Button
                                                 variant="content"
@@ -83,5 +77,5 @@ export default function TicketList({ Tickets }: TicketListProps) {
                 ))}
             </div>
         </ScrollArea>
-    );
+    )
 }

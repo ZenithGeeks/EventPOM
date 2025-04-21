@@ -7,11 +7,28 @@ import Add from "../components/buyTicketsPage/addToWishlist"
 import Purchase from "../components/buyTicketsPage/purchase"
 import TicketListTable from "../components/buyTicketsPage/tickets-list-table"
 import tickets from './tickets.json'
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import Script from "next/script"
 
 export default function Buy() {
     const [loading, setLoading] = useState(false)
+    const [ticketCount, setTicketCount] = useState<{ [key: string]: number }>(() => tickets.reduce((acc, ticket) => {
+        acc[ticket.id] = 0
+
+        return acc
+    }, {} as { [key: string]: number }))
+    const cartItems = tickets.filter(ticket => ticketCount[ticket.id] > 0)
+    const cartLength = cartItems.length
+    const total = cartItems.reduce((sum, item) => sum + item.price * ticketCount[item.id], 0)
+    const resetTicketCount = () => {
+        setTicketCount(
+            tickets.reduce((acc, ticket) => {
+                acc[ticket.id] = 0
+
+                return acc
+            }, {} as { [key: string]: number })
+        )
+    }
     const posters = [
         {
             id: 1,
@@ -51,12 +68,13 @@ export default function Buy() {
                 const token = response.id
                 const res = await fetch('/api/charge', {
                     method: 'POST',
-                    body: JSON.stringify({ token, amount: 2500 })
+                    body: JSON.stringify({ token, amount: total })
                 })
                 const result = await res.json()
 
                 if (result.success) {
                     setLoading(false)
+                    resetTicketCount()
                     alert('Payment successful')
                 } else {
                     setLoading(false)
@@ -90,29 +108,42 @@ export default function Buy() {
                         <h1 className="text-[16px]">Rajamangala National Stadium, Bangkok, Thailand</h1>
                     </div>
                     <h1 className="text-justify text-[16px]">{data.description}</h1>
-                    <h1 className="font-bold text-[18px]">Start 1,700 baht</h1>
+                    <h1 className="font-bold text-[18px]">Start 1,700 Baht.-</h1>
                     <Add />
                 </div>
             </div>
             <div className="flex mb-[100px] space-x-[60px]">
-                <TicketListTable Tickets={tickets} />
+                <TicketListTable
+                    Tickets={tickets}
+                    ticketCount={ticketCount}
+                    setTicketCount={setTicketCount}
+                />
                 <div className="flex-grow space-y-[15px]">
                     <div className="border-borderColor border-[1px] p-[30px] h-fit rounded-[3px] space-y-[25px]">
                         <div className="flex items-center space-x-[6px]">
                             <h1 className="font-bold text-[18px]">Cart</h1>
                             <ShoppingCartIcon className="w-[25px] h-[25px]" />
                         </div>
-                        <div className="flex items-center justify-between">
-                            <h1 className="font-bold text-[18px]">Early Bird Ticket</h1>
-                            <h1 className="text-[18px]">1,700 baht x 1</h1>
-                        </div>
+                        {cartLength === 0 ? (
+                            <h1 className="text-[18px]">Your cart is currently empty</h1>
+                        ) : (
+                            <>
+                                {cartItems.map(item => (
+                                    <div key={item.id} className="flex items-center justify-between">
+                                        <h1 className="font-bold max-w-[200px] text-[18px] truncate">{item.name}</h1>
+                                        <h1 className="text-[18px]">{item.price.toLocaleString()} Baht.- [{ticketCount[item.id]}]</h1>
+                                    </div>
+                                ))}
+                            </>
+                        )}
                         <div className="flex items-center justify-between">
                             <h1 className="font-bold text-[18px]">Total</h1>
-                            <h1 className="font-bold text-[18px]">1,700 baht</h1>
+                            <h1 className="font-bold text-[18px]">{total.toLocaleString()} Baht.-</h1>
                         </div>
                         <Purchase
                             loading={loading}
                             handle={handleOmisePayment}
+                            cartLength={cartLength}
                         />
                     </div>
                     <h1 className="font-bold text-borderColor text-center text-[18px]">Acceptable payments</h1>
