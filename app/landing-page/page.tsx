@@ -80,7 +80,7 @@ export default function Page() {
   // Image For Hero Section
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const images = [
-    "/images/hero1.png",
+    "http://localhost:9000/eventpom-bucket/g6glWQ3NA3ddRVaYc9tY.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=cvZyrkt2huShNXglI1x4%2F20250422%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250422T082618Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=665422d689b43aaea9658b6293f4c2b740e99dfb88632def0a1614019260fbff",
     "/images/hero2.png",
     "/images/hero3.jpg",
     "/images/hero4.jpg",
