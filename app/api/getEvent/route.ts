@@ -1,6 +1,6 @@
 export async function GET() {
     try {
-      const response = await fetch("http://localhost:3001/getEvent", {
+      const response = await fetch("http://localhost:3001/getEvents", {
         cache: "no-store",
       });
   
