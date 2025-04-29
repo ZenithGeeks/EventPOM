@@ -23,83 +23,175 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import { EventStatus } from "@/types/models";
+import { useEffect, useState } from "react";
+import { get } from "http";
+import { Order, Ticket } from "@/types/models";
 interface EventDetailsFormProps {
-  date?: Date;
-  setDate: (date: Date) => void;
-  setTag: (tag: string) => void;
+  eventData: EventData;
+  setEventData: React.Dispatch<React.SetStateAction<EventData>>;
+  setTag: (categoryId: string) => void;
+  startTime: Date;
+  setStartTime: (time: Date) => void;
+  endTime: Date;
+  setEndTime: (time: Date) => void;
+
+}
+interface EventData {
+  title: string;
+  categoryId: string;
+  description: string;
+  location: string;
+  startTime: Date;
+  endTime: Date;
+  status: EventStatus;
+  organizerId: string;
+  tickets?: Ticket[];
+  orders?: Order[];
+  imageUrl?: string;
+}
+
+interface Category {
+  id: number;
+  name: string;
 }
 
 const EventDetailsForm: React.FC<EventDetailsFormProps> = ({
-  date,
-  setDate,
+  eventData,
+  setEventData,
   setTag,
+  startTime,
+  setStartTime,
+  endTime,
+  setEndTime,
 }) => {
-  const tags = ["technology", "education", "science", "talk show"];
+  const [categories, setCategories] = useState<Category[]>([]);
+  
+  useEffect(()=> {
+    const getCategories = async () => {
+      const res = await fetch("/api/category");
+      const result = await res.json();
+      if(result) {
+        setCategories(result.categories);
+      }
+      else{
+        console.error("Failed to fetch categories");
+      }
+    }
+      getCategories();
+
+  },[])
+  
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setEventData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleTimeChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    date: Date,
+    setDate: (date: Date) => void
+  ) => {
+    const [hours, minutes] = e.target.value.split(":").map(Number);
+    const updatedDate = new Date(date);
+    updatedDate.setHours(hours, minutes);
+    setDate(updatedDate);
+  };
 
   return (
     <div className="flex flex-col gap-6 w-full">
-      <div className="flex flex-col md:flex-row gap-4 w-full">
-        <div className="flex flex-col gap-2 w-full md:w-1/2">
-          <Label className="font-bold">Event Name</Label>
-          <Input placeholder="Event Name" />
-        </div>
-        <div className="flex flex-col gap-2 w-full md:w-1/2">
-          <Label className="font-bold">Event Date</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-full justify-start text-left font-normal",
-                  !date && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {date ? format(date, "PPP") : "Pick a date"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={(day) => day && setDate(day)}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-      </div>
+      <Label className="font-bold">Event Name</Label>
+      <Input
+        name="title"
+        value={eventData.title}
+        onChange={handleInputChange}
+        placeholder="Event Name"
+      />
 
-      <div className="flex flex-col gap-2">
-        <Label className="font-bold">Event Description</Label>
-        <Textarea placeholder="Event Description" />
-      </div>
+      <Label className="font-bold">Event Description</Label>
+      <Textarea
+        name="description"
+        value={eventData.description}
+        onChange={handleInputChange}
+        placeholder="Event Description"
+      />
 
-      <div className="flex flex-col md:flex-row gap-4 w-full">
-        <div className="flex flex-col gap-2 w-full md:w-1/2">
-          <Label className="font-bold">Event Tag</Label>
-          <Select onValueChange={(value) => setTag(value)}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select tag" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Tags</SelectLabel>
-                {tags.map((tag) => (
-                  <SelectItem key={tag} value={tag}>
-                    {tag}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+      <Label className="font-bold">Event Category</Label>
+      <Select onValueChange={(e) => setTag(e)} disabled={categories?.length === 0}>
+  <SelectTrigger className="w-full">
+    <SelectValue placeholder="Select a category" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectGroup>
+      <SelectLabel>Categories</SelectLabel>
+      {categories?.length > 0 ? (
+        categories.map((tag) => (
+          <SelectItem key={tag.id} value={tag.id.toString()}>
+            {tag.name}
+          </SelectItem>
+        ))
+      ) : (
+        <div className="p-2 text-sm text-muted-foreground">
+          No categories available
         </div>
-        <div className="flex flex-col gap-2 w-full md:w-1/2">
-          <Label className="font-bold">Event Location</Label>
-          <Input placeholder="Event Location" />
-        </div>
-      </div>
+      )}
+    </SelectGroup>
+  </SelectContent>
+</Select>
+
+      <Label className="font-bold">Start Date & Time</Label>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="outline">
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            {format(startTime, "PPP")}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0">
+          <Calendar
+            mode="single"
+            selected={startTime}
+            onSelect={(date) => date && setStartTime(date)}
+            initialFocus
+          />
+        </PopoverContent>
+      </Popover>
+      <Input
+        type="time"
+        onChange={(e) => handleTimeChange(e, startTime, setStartTime)}
+      />
+
+      <Label className="font-bold">End Date & Time</Label>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="outline">
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            {format(endTime, "PPP")}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0">
+          <Calendar
+            mode="single"
+            selected={endTime}
+            onSelect={(date) => date && setEndTime(date)}
+            initialFocus
+          />
+        </PopoverContent>
+      </Popover>
+      <Input
+        type="time"
+        onChange={(e) => handleTimeChange(e, endTime, setEndTime)}
+      />
+
+      <Label className="font-bold">Event Location</Label>
+      <Input
+        name="location"
+        value={eventData.location}
+        onChange={handleInputChange}
+        placeholder="Event Location"
+      />
     </div>
   );
 };

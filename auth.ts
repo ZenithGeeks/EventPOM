@@ -4,6 +4,8 @@ import Google from "next-auth/providers/google"
 import PostgresAdapter from "@auth/pg-adapter"
 import { Pool } from "pg"
 import Nodemailer from "next-auth/providers/nodemailer"
+import Credentials from "next-auth/providers/credentials"
+
 
 const pool = new Pool({
   host: process.env.DATABASE_HOST,

@@ -70,8 +70,7 @@ export interface EventCategory {
 export interface Event {
   id: string;
   title: string;
-  typeId: string;
-  eventCategory?: string;
+  categoryId: string;
   description: string;
   location: string;
   imageUrl?: string;

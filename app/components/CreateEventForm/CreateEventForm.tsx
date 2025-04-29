@@ -6,50 +6,107 @@ import EventDetailsForm from "./EventDetailsForm";
 import TicketsForm from "./TicketsForm";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import { Event, EventStatus } from "@/types/models"; // Import type definitions
+import { Event, EventStatus,Ticket ,Order} from "@/types/models"; // Import type definitions
+import { toast } from "react-hot-toast";
+
+interface EventData {
+  title: string;
+  categoryId: string;
+  description: string;
+  location: string;
+  startTime: Date;
+  endTime: Date;
+  status: EventStatus;
+  organizerId: string;
+  tickets?: Ticket[];
+  orders?: Order[];
+  imageUrl?: string;
+}
 
 export default function CreateEventForm() {
-  const [date, setDate] = useState<Date>();
+  const [startTime, setStartTime] = useState<Date | null>(null);
+  const [endTime, setEndTime] = useState<Date | null>(null);
   const [picture, setPicture] = useState<File | null>(null);
   const [tag, setTag] = useState<string>("");
-  const [eventData, setEventData] = useState<
-    Omit<Event, "id" | "createdAt" | "application">
-  >({
+
+  const [eventData, setEventData] = useState<EventData>({
     title: "",
-    typeId: "",
+    categoryId: "",
     description: "",
     location: "",
     startTime: new Date(),
     endTime: new Date(),
     status: EventStatus.PENDING_APPROVAL,
-    organizerId: "",
+    organizerId: "1",
     tickets: [],
     orders: [],
-    eventCategory: ""
+    imageUrl: "",
   });
-  
+
   useEffect(() => {
-    setEventData((prevEventData) => ({
-      ...prevEventData,
-      eventCategory: tag,
+    setEventData((prev) => ({
+      ...prev,
+      categoryId: tag,
       imageUrl: picture ? URL.createObjectURL(picture) : "",
     }));
   }, [tag, picture]);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
+  
+    if (
+      // !eventData.title ||
+      // !eventData.categoryId ||
+      // !eventData.description ||
+      // !eventData.location ||
+      // !startTime ||
+      // !endTime 
+      !startTime
+    ) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+  
     try {
+      let publicImageUrl = "";
+      if (picture) {
+        const formData = new FormData();
+        formData.append("file", picture);
+  
+        const uploadRes = await fetch("http://localhost:3001/upload/", {
+          method: "POST",
+          body: formData,
+        });
+
+
+        if (!uploadRes.ok) {
+          throw new Error("Image upload failed");
+        }
+  
+        const uploadResult = await uploadRes.json();
+        const uploadedFileName = uploadResult.fileName || uploadResult.name_file;
+        const publicLinkRes = await fetch("http://localhost:3001/upload/public_link", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ name_file: uploadedFileName }),
+        });
+  
+        if (!publicLinkRes.ok) {
+          throw new Error("Failed to retrieve public link");
+        }
+  
+        const publicLinkResult = await publicLinkRes.json();
+        publicImageUrl = publicLinkResult.publicUrl || publicLinkResult.url;
+      }
+  
+      // 3. Now create event with public image URL
       const formattedData: Omit<Event, "id" | "createdAt"> = {
         ...eventData,
-        startTime: date
-          ? new Date(date.getTime() + 2 * 60 * 60 * 1000)
-          : new Date(),
-        endTime: date
-          ? new Date(date.getTime() + 2 * 60 * 60 * 1000)
-          : new Date(),
-        imageUrl: picture ? URL.createObjectURL(picture) : "",
+        imageUrl: publicImageUrl,
       };
-
+  
       const response = await fetch("/api/events", {
         method: "POST",
         headers: {
@@ -57,21 +114,20 @@ export default function CreateEventForm() {
         },
         body: JSON.stringify(formattedData),
       });
-
+  
       const result = await response.json();
-
+  
       if (!response.ok) {
         throw new Error(result.error || "Failed to create event");
       }
-
-      console.log("Event Created Successfully:", result.event);
-      alert("Event created successfully!");
+  
+      toast.success("Event created successfully!");
+      console.log("Created event:", result.event);
     } catch (error) {
-      console.error("Event creation failed:", error);
-      alert("Failed to create event.");
+      console.error("Submission error:", error);
+      toast.error("Event creation failed.");
     }
   }
-
   return (
     <form className="flex flex-col gap-12 pt-10 px-4" onSubmit={handleSubmit}>
       <div className="flex justify-start pt-10">
@@ -82,7 +138,12 @@ export default function CreateEventForm() {
           <PosterUpload picture={picture} setPicture={setPicture} />
         </div>
         <div className="flex flex-col gap-8 w-full pt-2">
-          <EventDetailsForm date={date} setDate={setDate}  setTag={setTag}/>
+          <EventDetailsForm
+            eventData={eventData}
+            setEventData={setEventData}
+            setStartTime={setStartTime}
+            setEndTime={setEndTime}
+            setTag={setTag} startTime={startTime as Date} endTime={endTime as Date} />
           <TicketsForm />
         </div>
       </div>

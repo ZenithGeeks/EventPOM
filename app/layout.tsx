@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar";
-import { SessionProvider } from "next-auth/react"
-
-const Poppinsfont = Poppins({subsets: ["latin"], weight: "500"});
+import { SessionProvider } from "next-auth/react";
+import { Toaster } from "react-hot-toast";
+const Poppinsfont = Poppins({ subsets: ["latin"], weight: "500" });
 
 export const metadata: Metadata = {
   title: "EventPOM",
@@ -20,14 +20,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${Poppinsfont} antialiased`}
-      >
-         <SessionProvider >
-              <Navbar />
-        {children}
-         </SessionProvider>
-    
+      <body className={`${Poppinsfont} antialiased`}>
+        <SessionProvider>
+          <Navbar />
+          {children}
+          <Toaster position="bottom-right" />
+        </SessionProvider>
       </body>
     </html>
   );
