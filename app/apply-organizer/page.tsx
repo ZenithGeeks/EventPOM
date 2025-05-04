@@ -89,7 +89,7 @@ export default function CreateOrganizerAccount({}: CreateOrganizerAccountProps) 
               </p>
             </div>
             {session?.user?.image && (
-              <div className="relative w-16 h-16">
+              <div className="relative w-10 h-10">
                 <Image
                   src={session.user.image}
                   alt="User Profile"
@@ -195,7 +195,7 @@ export default function CreateOrganizerAccount({}: CreateOrganizerAccountProps) 
               size="default"
               onClick={handleCreateAccount}
               disabled={!termsAccepted}
-              className={`w-full py-3 font-semibold tracking-wide uppercase bg-indigo-900 text-white hover:bg-indigo-800 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed`}
+              className="w-full py-3 font-semibold tracking-wide uppercase bg-indigo-900 text-white hover:bg-indigo-800 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
             >
               Create Account
             </Button>
