@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import Image from 'next/image';
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { MapPinIcon } from "@heroicons/react/24/solid";
@@ -11,33 +11,9 @@ export default function Page() {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchSubmitted, setSearchSubmitted] = useState(false);
+  const [data, setData] = useState<any>([]);
 
-  const [data,setData] = useState<any>([])
-  // Sample events data (Replace this with real API data later)
-  const [events, setEvents] = useState([
-    { id: 1, title: "Music Festival", location: "New York", date: "2025-04-10", image: "http://localhost:9000/eventpom-bucket/g6glWQ3NA3ddRVaYc9tY.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=cvZyrkt2huShNXglI1x4%2F20250325%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250325T091611Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=e5e8ce1daa1869b04943fa11c4af2f83479137f2e86cdda306651e917bcc9e0d" },
-    { id: 2, title: "Tech Conference", location: "San Francisco", date: "2025-05-15", image: "/images/event2.png" },
-    { id: 3, title: "Art Exhibition", location: "Paris", date: "2025-06-20", image: "/images/event3.jpg" },
-    { id: 4, title: "Food Fair", location: "Tokyo", date: "2025-07-05", image: "/images/event4.jpg" },
-    { id: 5, title: "Book Fair", location: "London", date: "2025-08-12", image: "/images/event5.jpg" },
-    { id: 6, title: "Fashion Show", location: "Milan", date: "2025-09-18", image: "/images/event6.jpg" },
-    { id: 7, title: "Film Festival", location: "Los Angeles", date: "2025-10-05", image: "/images/event7.png" },
-    { id: 8, title: "Gaming Expo", location: "Seoul", date: "2025-11-22", image: "/images/event8.jpg" },
-    { id: 9, title: "Car Show", location: "Detroit", date: "2025-12-10", image: "/images/event9.jpg" },
-    { id: 10, title: "Marathon", location: "Boston", date: "2026-01-15", image: "/images/event10.png" },
-    { id: 11, title: "Comedy Night", location: "Chicago", date: "2026-02-20", image: "/images/event11.png" },
-    { id: 12, title: "Photography Expo", location: "Berlin", date: "2026-03-25", image: "/images/event2.png" },
-    { id: 13, title: "Science Fair", location: "Toronto", date: "2026-04-14", image: "/images/event5.jpg" },
-    { id: 14, title: "Wine Tasting", location: "Napa Valley", date: "2026-05-09", image: "/images/event7.png" },
-    { id: 15, title: "Yoga Retreat", location: "Bali", date: "2026-06-30", image: "/images/event9.jpg" },
-    { id: 16, title: "Space Exploration Summit", location: "Houston", date: "2026-07-21", image: "/images/event4.jpg" },
-    { id: 17, title: "Pet Expo", location: "Sydney", date: "2026-08-15", image: "/images/event3.jpg" },
-    { id: 18, title: "Sustainability Conference", location: "Copenhagen", date: "2026-09-12", image: "/images/event1.jpg" },
-    { id: 19, title: "Robotics Fair", location: "Tokyo", date: "2026-10-28", image: "/images/event2.png" },
-    { id: 20, title: "History Museum Exhibit", location: "Athens", date: "2026-11-19", image: "/images/event10.png" }
-  ]);
-
-  // Debounce search input
+  // Debounce search input and fetch events
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
@@ -47,14 +23,13 @@ export default function Page() {
       try {
         const res = await fetch("/api/getEvent");
         const result = await res.json();
-        console.log(result.events)
+        console.log(result.events);
         if (!res.ok) {
           throw new Error(result.error || "An unknown error occurred");
         }
-
         setData(result.events);
       } catch (err) {
-        console.log(err)
+        console.log(err);
       }
     };
 
@@ -62,13 +37,17 @@ export default function Page() {
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  //regex search
+  // Regex search
   const filteredEvents = searchTerm
-    ? events.filter((event) => {
-      const regex = new RegExp(debouncedSearchTerm, "i");
-      return regex.test(event.title) || regex.test(event.location) || regex.test(event.date);
-    })
-    : events;
+    ? data.filter((event: any) => {
+        const regex = new RegExp(debouncedSearchTerm, "i");
+        return (
+          regex.test(event.title) ||
+          regex.test(event.location) ||
+          regex.test(new Date(event.startTime).toLocaleDateString())
+        );
+      })
+    : data;
 
   // Handle search submission
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -79,53 +58,125 @@ export default function Page() {
 
   // Image For Hero Section
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [direction, setDirection] = useState<"next" | "prev">("next");
   const images = [
-    "/images/hero1.png",
-    "/images/hero2.png",
-    "/images/hero3.jpg",
-    "/images/hero4.jpg",
-    "/images/hero5.png",
-    "/images/hero6.jpg",
-    "/images/hero7.png",
-    "/images/hero8.png",
-    "/images/hero9.jpg",
+    "http://localhost:9000/eventpom-bucket/hero1.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=cvZyrkt2huShNXglI1x4%2F20250422%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250422T094302Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=e11b346b15f4af9c397f9996ba80952bab7b7af706ed531fdeaec9c25c08b9c2",
+    "http://localhost:9000/eventpom-bucket/hero2.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=cvZyrkt2huShNXglI1x4%2F20250422%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250422T095833Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=75e4d1d870cc6fc5d6a9f78006632de210639a4b8a9f838b7cc025ad25c5297e",
+    "http://localhost:9000/eventpom-bucket/hero3.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=cvZyrkt2huShNXglI1x4%2F20250422%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250422T100519Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=272382f70485dbe2e2f275a7b373b32bb7467316d9586a1cee4562e837d82397",
+    "http://localhost:9000/eventpom-bucket/hero4.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=cvZyrkt2huShNXglI1x4%2F20250422%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250422T100333Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=c9ad5cf68596e1e1b3cbe8fe8b21945ebf9ed298e245e3e80fece7167eaab3aa",
+    "http://localhost:9000/eventpom-bucket/hero5.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=cvZyrkt2huShNXglI1x4%2F20250422%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250422T101109Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=65ed78585d37dbbc8b74a1c1ba8a3cad9317a1db5f92432e77dddcdc018fc6eb",
+    "http://localhost:9000/eventpom-bucket/hero6.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=cvZyrkt2huShNXglI1x4%2F20250422%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250422T101330Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=d0cca2464fe13dfac29178d39b910f8648ab8ab016d8afae3352f5300e7da594",
+    "http://localhost:9000/eventpom-bucket/hero7.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=cvZyrkt2huShNXglI1x4%2F20250422%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250422T101604Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=cbad5a5571aeea3afbeff91e5a1f63a974f2b993779e577d4a832c8759cc5acc",
+    "http://localhost:9000/eventpom-bucket/hero8.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=cvZyrkt2huShNXglI1x4%2F20250422%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250422T101703Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=da9bcb032894d5f3892ea6863fd5f80ee30b1551b9f202295538117c6215b4dd",
+    "http://localhost:9000/eventpom-bucket/hero9.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=cvZyrkt2huShNXglI1x4%2F20250422%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250422T101801Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=021075140b19499cebc12cdcf31d6ec34c94d92b12765848fbb2304a3db80b6a",
   ];
+
+  // Preload images to ensure smooth transitions
+  useEffect(() => {
+    images.forEach((src) => {
+      const img = new window.Image();
+      img.src = src;
+    });
+  }, []);
+
+  // Autoplay: Change image every 5 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      goToNextImage();
+    }, 5000); // Change every 5 seconds
+    return () => clearInterval(timer);
+  }, []);
 
   // Left arrow click
   const goToPreviousImage = () => {
-    setCurrentImageIndex((prevIndex) => (prevIndex === 0 ? images.length - 1 : prevIndex - 1));
+    setDirection("prev");
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === 0 ? images.length - 1 : prevIndex - 1
+    );
   };
 
   // Right arrow click
   const goToNextImage = () => {
-    setCurrentImageIndex((prevIndex) => (prevIndex === images.length - 1 ? 0 : prevIndex + 1));
+    setDirection("next");
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === images.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+
+  // Dot navigation click
+  const goToImage = (index: number) => {
+    setDirection(index > currentImageIndex ? "next" : "prev");
+    setCurrentImageIndex(index);
   };
 
   return (
     <div className="bg-white min-h-screen overflow-auto">
       {/* Hero Section - Image Slider */}
-      <section className="w-full flex justify-center py-12 mt-24 relative">
-        <div className="relative w-1/2 h-48 bg-gray-300 flex items-center justify-center">
+      <section className="w-full flex justify-center pt-32 pb-20 relative">
+        {/* Full-width blurred background */}
+        <div className="hidden lg:block absolute top-0 left-0 w-full h-[575px] z-0 overflow-hidden">
           <Image
             src={images[currentImageIndex]}
-            alt={`Event ${currentImageIndex + 1}`}
+            alt={`Event ${currentImageIndex + 1} blurred`}
             layout="fill"
-            objectFit="contain"
-            className="w-full h-full"
+            objectFit="cover"
+            className="filter blur-xl scale-110"
           />
+        </div>
+
+        {/* Foreground content */}
+        <div className="relative w-full sm:w-full md:w-full lg:w-full h-64 sm:h-72 md:h-80 lg:h-96 overflow-hidden z-10">
+          <div className="relative w-full h-full">
+            {images.map((src, index) => (
+              <div
+                key={index}
+                className={`absolute inset-0 transition-transform duration-[1800ms] ease-in-out ${
+                  index === currentImageIndex
+                    ? "translate-x-0 z-10"
+                    : direction === "next" && index === (currentImageIndex - 1 || images.length - 1)
+                    ? "-translate-x-full z-0"
+                    : direction === "prev" && index === (currentImageIndex + 1) % images.length
+                    ? "translate-x-full z-0"
+                    : "translate-x-full z-0"
+                }`}
+              >
+                <Image
+                  src={src}
+                  alt={`Event ${index + 1}`}
+                  layout="fill"
+                  objectFit="contain"
+                  priority={index === currentImageIndex}
+                />
+              </div>
+            ))}
+          </div>
+          {/* Navigation arrows */}
           <ArrowLeftCircleIcon
-            className="absolute left-2 top-1/2 transform -translate-y-1/2 w-8 h-8 text-gray-700 cursor-pointer"
+            className="absolute left-2 sm:left-2 md:left-[7%] lg:left-[9%] xl:left-[16%] 2xl:left-[23%] top-1/2 transform -translate-y-1/2 w-10 h-10 text-white bg-gray-800 bg-opacity-50 hover:bg-opacity-75 rounded-full cursor-pointer z-20"
             onClick={goToPreviousImage}
           />
           <ArrowRightCircleIcon
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 text-gray-700 cursor-pointer"
+            className="absolute right-2 sm:right-2 md:right-[7%] lg:right-[9%] xl:right-[16%] 2xl:right-[23%] top-1/2 transform -translate-y-1/2 w-10 h-10 text-white bg-gray-800 bg-opacity-50 hover:bg-opacity-75 rounded-full cursor-pointer z-20"
             onClick={goToNextImage}
           />
+          {/* Navigation dots */}
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
+            {images.map((_, index) => (
+              <button
+                key={index}
+                className={`w-3 h-3 rounded-full ${
+                  index === currentImageIndex ? "bg-white" : "bg-gray-400"
+                } hover:bg-gray-200 transition-colors duration-300`}
+                onClick={() => goToImage(index)}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Upcoming Events Title */}
-      <section className="px-8 py-2">
+      <section className="px-8 py-1">
         <h2 className="text-2xl font-bold text-center text-indigo-900">
           Upcoming Events
         </h2>
@@ -133,7 +184,10 @@ export default function Page() {
 
       {/* Search & Filter Row */}
       <div className="mt-4 space-y-4 relative flex flex-col items-center">
-        <form onSubmit={handleSearchSubmit} className="w-full max-w-2xl mx-auto flex items-center border px-4 py-2 bg-gray-100 relative">
+        <form
+          onSubmit={handleSearchSubmit}
+          className="w-full max-w-2xl mx-auto flex items-center border px-4 py-2 bg-gray-100 relative"
+        >
           <input
             type="text"
             className="w-full bg-transparent outline-none text-gray-700"
@@ -151,7 +205,7 @@ export default function Page() {
         {/* Search Suggestions */}
         {showSuggestions && searchTerm && (
           <ul className="absolute z-10 bg-white shadow-lg rounded-md top-6 w-full max-w-2xl mx-auto text-center left-1/2 transform -translate-x-1/2">
-            {data?.slice(0, 5).map((event:any) => (
+            {data?.slice(0, 5).map((event: any) => (
               <li
                 key={event.id}
                 className="px-4 py-2 cursor-pointer hover:bg-gray-200"
@@ -166,10 +220,11 @@ export default function Page() {
           </ul>
         )}
       </div>
-      {/*Events*/}
+
+      {/* Events */}
       <section className="flex items-center justify-center mt-12">
         <div className="grid grid-cols-2 md:grid-cols-6 gap-4 md:gap-14">
-          {data?.map((data:any) => (
+          {filteredEvents?.map((data: any) => (
             <div key={data.id} className="w-full m-4 bg-white overflow-hidden">
               {/* Event Image */}
               <div className="relative w-full aspect-[2/3]">
@@ -184,8 +239,13 @@ export default function Page() {
 
               {/* Event Details */}
               <div className="p-2">
-                <h3 className="text-base font-semibold text-gray-800">{data.title}</h3>
-                <p className="text-sm text-gray-500">{new Date(data.startTime).toLocaleDateString()}</p>
+                <h3 className="text-base font-semibold text-gray-800">
+                  {data.title}
+                </h3>
+                <p className="text-sm text-red-500">
+                  {new Date(data.startTime).toLocaleDateString()} –{" "}
+                  {new Date(data.endTime).toLocaleDateString()}
+                </p>
                 <div className="flex items-center space-x-1 mt-1">
                   <MapPinIcon className="w-4 h-4 text-white stroke-gray-500" />
                   <p className="text-sm text-gray-600">{data.location}</p>
