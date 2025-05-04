@@ -12,9 +12,20 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "./ui/button";
+import { usePathname } from "next/navigation";
 
 export default function Navbar() {
   const { data: session } = useSession();
+  const pathname = usePathname()
+
+  // Hide Navbar on specific routes
+  const hideNavbar = ["/organization"]
+  if (hideNavbar.includes(pathname)) {
+    return (
+      <div></div>
+    )
+  }
+  else {
   return (
     <nav className="bg-white shadow-md border-b border-gray-200 w-full fixed top-0 left-0 z-50">
       <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
@@ -86,4 +97,5 @@ export default function Navbar() {
       </div>
     </nav>
   );
+}
 }
