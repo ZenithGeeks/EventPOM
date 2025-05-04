@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import Image from 'next/image';
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { MapPinIcon } from "@heroicons/react/24/solid";
@@ -11,9 +11,9 @@ export default function Page() {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchSubmitted, setSearchSubmitted] = useState(false);
-  const [data, setData] = useState<any>([])
+  const [data, setData] = useState<any>([]);
 
-  // Debounce search input
+  // Debounce search input and fetch events
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
@@ -23,14 +23,13 @@ export default function Page() {
       try {
         const res = await fetch("/api/getEvent");
         const result = await res.json();
-        console.log(result.events)
+        console.log(result.events);
         if (!res.ok) {
           throw new Error(result.error || "An unknown error occurred");
         }
-
         setData(result.events);
       } catch (err) {
-        console.log(err)
+        console.log(err);
       }
     };
 
@@ -38,13 +37,16 @@ export default function Page() {
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  //regex search
+  // Regex search
   const filteredEvents = searchTerm
     ? data.filter((event: any) => {
-      const regex = new RegExp(debouncedSearchTerm, "i");
-      return (regex.test(event.title) || regex.test(event.location) || regex.test(new Date(event.startTime).toLocaleDateString())
-    );
-    })
+        const regex = new RegExp(debouncedSearchTerm, "i");
+        return (
+          regex.test(event.title) ||
+          regex.test(event.location) ||
+          regex.test(new Date(event.startTime).toLocaleDateString())
+        );
+      })
     : data;
 
   // Handle search submission
@@ -56,6 +58,7 @@ export default function Page() {
 
   // Image For Hero Section
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [direction, setDirection] = useState<"next" | "prev">("next");
   const images = [
     "http://localhost:9000/eventpom-bucket/hero1.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=cvZyrkt2huShNXglI1x4%2F20250422%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250422T094302Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=e11b346b15f4af9c397f9996ba80952bab7b7af706ed531fdeaec9c25c08b9c2",
     "http://localhost:9000/eventpom-bucket/hero2.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=cvZyrkt2huShNXglI1x4%2F20250422%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250422T095833Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=75e4d1d870cc6fc5d6a9f78006632de210639a4b8a9f838b7cc025ad25c5297e",
@@ -68,14 +71,42 @@ export default function Page() {
     "http://localhost:9000/eventpom-bucket/hero9.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=cvZyrkt2huShNXglI1x4%2F20250422%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250422T101801Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=021075140b19499cebc12cdcf31d6ec34c94d92b12765848fbb2304a3db80b6a",
   ];
 
+  // Preload images to ensure smooth transitions
+  useEffect(() => {
+    images.forEach((src) => {
+      const img = new window.Image();
+      img.src = src;
+    });
+  }, []);
+
+  // Autoplay: Change image every 5 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      goToNextImage();
+    }, 5000); // Change every 5 seconds
+    return () => clearInterval(timer);
+  }, []);
+
   // Left arrow click
   const goToPreviousImage = () => {
-    setCurrentImageIndex((prevIndex) => (prevIndex === 0 ? images.length - 1 : prevIndex - 1));
+    setDirection("prev");
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === 0 ? images.length - 1 : prevIndex - 1
+    );
   };
 
   // Right arrow click
   const goToNextImage = () => {
-    setCurrentImageIndex((prevIndex) => (prevIndex === images.length - 1 ? 0 : prevIndex + 1));
+    setDirection("next");
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === images.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+
+  // Dot navigation click
+  const goToImage = (index: number) => {
+    setDirection(index > currentImageIndex ? "next" : "prev");
+    setCurrentImageIndex(index);
   };
 
   return (
@@ -95,21 +126,52 @@ export default function Page() {
 
         {/* Foreground content */}
         <div className="relative w-full sm:w-full md:w-full lg:w-full h-64 sm:h-72 md:h-80 lg:h-96 overflow-hidden z-10">
-          <Image
-            src={images[currentImageIndex]}
-            alt={`Event ${currentImageIndex + 1}`}
-            layout="fill"
-            objectFit="contain"
-          />
+          <div className="relative w-full h-full">
+            {images.map((src, index) => (
+              <div
+                key={index}
+                className={`absolute inset-0 transition-transform duration-[1800ms] ease-in-out ${
+                  index === currentImageIndex
+                    ? "translate-x-0 z-10"
+                    : direction === "next" && index === (currentImageIndex - 1 || images.length - 1)
+                    ? "-translate-x-full z-0"
+                    : direction === "prev" && index === (currentImageIndex + 1) % images.length
+                    ? "translate-x-full z-0"
+                    : "translate-x-full z-0"
+                }`}
+              >
+                <Image
+                  src={src}
+                  alt={`Event ${index + 1}`}
+                  layout="fill"
+                  objectFit="contain"
+                  priority={index === currentImageIndex}
+                />
+              </div>
+            ))}
+          </div>
           {/* Navigation arrows */}
           <ArrowLeftCircleIcon
-            className="absolute left-2 sm:left-2 md:left-[7%] lg:left-[9%] xl:left-[16%] 2xl:left-[23%] top-1/2 transform -translate-y-1/2 w-8 h-8 text-white bg-gray-500 bg-opacity-25 hover:bg-opacity-75 rounded-full cursor-pointer z-20"
+            className="absolute left-2 sm:left-2 md:left-[7%] lg:left-[9%] xl:left-[16%] 2xl:left-[23%] top-1/2 transform -translate-y-1/2 w-10 h-10 text-white bg-gray-800 bg-opacity-50 hover:bg-opacity-75 rounded-full cursor-pointer z-20"
             onClick={goToPreviousImage}
           />
           <ArrowRightCircleIcon
-            className="absolute right-2 sm:right-2 md:right-[7%] lg:right-[9%] xl:right-[16%] 2xl:right-[23%] top-1/2 transform -translate-y-1/2 w-8 h-8 text-white bg-gray-500 bg-opacity-25 hover:bg-opacity-75 rounded-full cursor-pointer z-20"
+            className="absolute right-2 sm:right-2 md:right-[7%] lg:right-[9%] xl:right-[16%] 2xl:right-[23%] top-1/2 transform -translate-y-1/2 w-10 h-10 text-white bg-gray-800 bg-opacity-50 hover:bg-opacity-75 rounded-full cursor-pointer z-20"
             onClick={goToNextImage}
           />
+          {/* Navigation dots */}
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
+            {images.map((_, index) => (
+              <button
+                key={index}
+                className={`w-3 h-3 rounded-full ${
+                  index === currentImageIndex ? "bg-white" : "bg-gray-400"
+                } hover:bg-gray-200 transition-colors duration-300`}
+                onClick={() => goToImage(index)}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
         </div>
       </section>
 
@@ -122,7 +184,10 @@ export default function Page() {
 
       {/* Search & Filter Row */}
       <div className="mt-4 space-y-4 relative flex flex-col items-center">
-        <form onSubmit={handleSearchSubmit} className="w-full max-w-2xl mx-auto flex items-center border px-4 py-2 bg-gray-100 relative">
+        <form
+          onSubmit={handleSearchSubmit}
+          className="w-full max-w-2xl mx-auto flex items-center border px-4 py-2 bg-gray-100 relative"
+        >
           <input
             type="text"
             className="w-full bg-transparent outline-none text-gray-700"
@@ -155,10 +220,11 @@ export default function Page() {
           </ul>
         )}
       </div>
-      {/*Events*/}
+
+      {/* Events */}
       <section className="flex items-center justify-center mt-12">
         <div className="grid grid-cols-2 md:grid-cols-6 gap-4 md:gap-14">
-          {data?.map((data: any) => (
+          {filteredEvents?.map((data: any) => (
             <div key={data.id} className="w-full m-4 bg-white overflow-hidden">
               {/* Event Image */}
               <div className="relative w-full aspect-[2/3]">
@@ -173,8 +239,13 @@ export default function Page() {
 
               {/* Event Details */}
               <div className="p-2">
-                <h3 className="text-base font-semibold text-gray-800">{data.title}</h3>
-                <p className="text-sm text-red-500"> {new Date(data.startTime).toLocaleDateString()} –{" "} {new Date(data.endTime).toLocaleDateString()}</p>
+                <h3 className="text-base font-semibold text-gray-800">
+                  {data.title}
+                </h3>
+                <p className="text-sm text-red-500">
+                  {new Date(data.startTime).toLocaleDateString()} –{" "}
+                  {new Date(data.endTime).toLocaleDateString()}
+                </p>
                 <div className="flex items-center space-x-1 mt-1">
                   <MapPinIcon className="w-4 h-4 text-white stroke-gray-500" />
                   <p className="text-sm text-gray-600">{data.location}</p>
