@@ -12,6 +12,9 @@ import {
   SidebarMenuButton,
   SidebarHeader,
   SidebarFooter,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
+  SidebarMenuSub,
 } from "@/components/ui/sidebar";
 import {
   HomeIcon,
@@ -25,10 +28,22 @@ import Image from "next/image";
 import UserDropdown from "./organization/userDropdown";
 
 const items = [
-  { title: "Dashboard", url: "#", icon: HomeIcon },
-  { title: "All Events", url: "#", icon: CalendarIcon },
-  { title: "Transaction", url: "#", icon: CurrencyDollarIcon },
-  { title: "Members", url: "#", icon: UserGroupIcon },
+  { title: "Dashboard", icon: HomeIcon, subItems: [] },
+  {
+    title: "All Events",
+    icon: CalendarIcon,
+    subItems: ["Event Details"],
+  },
+  {
+    title: "Transaction",
+    icon: CurrencyDollarIcon,
+    subItems: [],
+  },
+  {
+    title: "Members",
+    icon: UserGroupIcon,
+    subItems: [],
+  },
 ];
 
 export default function AppSidebar({
@@ -38,10 +53,8 @@ export default function AppSidebar({
   activeTab: string;
   onTabChange: (tab: string) => void;
 }) {
-  const [activeItem, setActiveItem] = React.useState(activeTab);
   const handleItemClick = (title: string) => {
     onTabChange(title);
-    setActiveItem(title);
   };
 
   return (
@@ -70,18 +83,38 @@ export default function AppSidebar({
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <a
-                      href={item.url}
-                      className={`flex items-center gap-2 px-3 py-2 rounded ${
-                        activeItem === item.title
+                      onClick={() => handleItemClick(item.title)}
+                      className={`w-full flex items-center gap-2 px-3 py-2 rounded ${
+                        activeTab === item.title
                           ? "bg-[#2A2A6D] text-white"
                           : "hover:bg-gray-100"
                       }`}
-                      onClick={() => handleItemClick(item.title)}
                     >
                       <item.icon className="w-5 h-5" />
                       <span>{item.title}</span>
                     </a>
                   </SidebarMenuButton>
+
+                  {item.subItems.length > 0 && (
+                    <SidebarMenuSub>
+                      {item.subItems.map((subTitle) => (
+                        <SidebarMenuSubItem key={subTitle}>
+                          <SidebarMenuSubButton asChild>
+                            <a
+                              onClick={() => handleItemClick(subTitle)}
+                              className={`w-full text-left px-6 py-2 text-sm rounded ${
+                                activeTab === subTitle
+                                  ? "bg-[#2A2A6D] text-white"
+                                  : "hover:bg-gray-100"
+                              }`}
+                            >
+                              {subTitle}
+                            </a>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  )}
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
