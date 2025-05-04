@@ -40,7 +40,7 @@ export default function TicketList({ Tickets, ticketCount, setTicketCount }: Tic
                             <CardTitle className="flex flex-row justify-between w-full gap-8">
                                 <div className="flex flex-col">
                                     <p className="font-bold text-justify text-lg">{ticket.name}</p>
-                                    <p className="text-sm text-gray-400 py-2">
+                                    <p className="text-justify text-sm text-gray-400 py-2">
                                         {ticket.description}
                                     </p>
                                 </div>
