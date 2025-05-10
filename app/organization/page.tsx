@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import AppSidebar from "@/components/app-sidebar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useSession } from "next-auth/react";
-import CreateEventForm from "../components/CreateEventForm/CreateEventForm";
 import { useRouter } from "next/navigation";
 import OrganizationDashboard from "../components/organization/dashboard/dashboard";
+import EventApplicationWizard from "../components/CreateEventForm/EventApplicationWizard";
 
 export default function OrganizationPage() {
   const { data: session, status } = useSession();
@@ -56,7 +56,7 @@ export default function OrganizationPage() {
         )}
         {activeTab === "Create New Event" && (
           <div>
-            <CreateEventForm organizerId={organizerId} />
+            <EventApplicationWizard organizerId={organizerId} />
           </div>
         )}
         {activeTab === "Transaction" && (
