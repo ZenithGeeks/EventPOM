@@ -30,6 +30,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-};
+};//add localhost protocal ***http***
 
 export default nextConfig;

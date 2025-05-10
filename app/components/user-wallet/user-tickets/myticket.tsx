@@ -23,7 +23,6 @@ interface RawTicket {
   event_imageurl?: string;
 }
 
-
 export default function MyTicket() {
   const [activeTab, setActiveTab] = useState<"active" | "past">("active");
   const [tickets, setTickets] = useState<Ticket[]>([]);

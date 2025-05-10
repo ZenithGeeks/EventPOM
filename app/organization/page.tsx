@@ -13,7 +13,7 @@ export default function OrganizationPage() {
   const [organizerId, setOrganizerId] = useState("");
   const [activeTab, setActiveTab] = useState("Dashboard");
   const router = useRouter();
-
+ console.log(session)
   useEffect(() => {
     if (status === "loading") return;
     if (session?.user.role !== "ORGANIZER") {
