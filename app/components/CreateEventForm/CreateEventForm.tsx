@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import PosterUpload from "./PosterUpload";
 import EventDetailsForm from "./EventDetailsForm";
 import { Button } from "@/components/ui/button";
+import toast, { Toaster } from "react-hot-toast";
 
 interface Category {
   id: number;
@@ -83,7 +84,7 @@ export default function CreateEventForm({
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || "Failed to create event");
 
-    alert("Event created successfully!");
+    toast.success("Event created successfully!");
     onSuccess(result.event.id);
     }
   } catch (err) {
@@ -96,7 +97,9 @@ export default function CreateEventForm({
   return (
     <form className="flex flex-col gap-14 pt-10 px-4" onSubmit={handleSubmit}>
       <h1 className="text-3xl font-bold text-[#2A2A6D]">Create Event</h1>
-
+      <Toaster
+        position="top-right"
+        />
      <div className="grid grid-cols-1 lg:grid-cols-3 gap-32 w-full">
  <div className="w-full max-w-sm">
   <PosterUpload picture={picture} setPicture={setPicture} />

@@ -13,10 +13,9 @@ export default function OrganizationPage() {
   const [organizerId, setOrganizerId] = useState("");
   const [activeTab, setActiveTab] = useState("Dashboard");
   const router = useRouter();
- console.log(session)
   useEffect(() => {
     if (status === "loading") return;
-    if (session?.user.role !== "ORGANIZER") {
+    if (session?.user.role === "USER") {
       router.push("/landing-page");
     }
   }, [session, status, router]);
@@ -33,7 +32,7 @@ export default function OrganizationPage() {
       {/* Main Content */}
       <main className="flex-1 w-full md:ml-32 px-4 sm:px-8 md:px-12 py-8">
         {/* Show sidebar trigger button on small screens */}
-        <div className="md:hidden flex justify-end mb-4">
+        <div className="absolute top-4 right-4  flex justify-end mb-4">
           <SidebarTrigger />
         </div>
 

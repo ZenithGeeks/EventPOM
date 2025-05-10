@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
-
+import toast, {Toaster} from "react-hot-toast"
 interface Ticket {
   name: string
   seat: string
@@ -68,11 +68,13 @@ export default function TicketsForm({ eventId, onBack, onNext }: TicketsFormProp
 
         const data = await res.json()
         if (!res.ok) throw new Error(data.error || "Failed to create ticket")
+        toast.success("All tickets created successfully!")
       }
-      alert("All tickets created successfully!")
+
       onNext()
     } catch (error) {
       alert("Error: " + error)
+      toast.error("Failed to create tickets.")
     }
   }
 
@@ -81,7 +83,9 @@ export default function TicketsForm({ eventId, onBack, onNext }: TicketsFormProp
       <div className="bg-[#2A2A6D] text-white px-4 py-3">
         <h2 className="text-lg font-bold">Tickets</h2>
       </div>
-
+        <Toaster
+              position="top-right"
+              />
       <div>
         {tickets.map((ticket, index) => (
           <div

@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import LocationSearch from "./LocationSearch";
 
 interface Tag {
   id: number;
@@ -58,10 +59,10 @@ const EventDetailsForm: React.FC<EventDetailsFormProps> = ({
       </div>
 
       {/* Location */}
-      <div className="flex flex-col gap-2">
-        <Label className="text-sm font-semibold text-muted-foreground">Location</Label>
-        <Input placeholder="e.g. Bangkok International Hall" onChange={(e) => setlocation(e.target.value)} />
-      </div>
+      <div className="flex flex-col gap-2 col-span-2">
+      <Label className="text-sm font-semibold text-muted-foreground">Location</Label>
+      <LocationSearch setLocation={setlocation} />
+    </div>
 
       {/* Start Time */}
       <div className="flex flex-col gap-2">
