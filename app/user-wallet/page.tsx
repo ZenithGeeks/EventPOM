@@ -9,10 +9,9 @@ import { useSession } from "next-auth/react";
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("Tickets");
   const { data: session } = useSession();
-
+  console.log(session);
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-white pt-[6rem]">
-
+    <div className="flex flex-col md:flex-row bg-white">
       <aside className="w-full md:w-[25rem] bg-white pt-4 flex flex-col items-center">
         <div className="mb-4">
           {session?.user ? (
@@ -28,7 +27,6 @@ export default function SettingsPage() {
 
         </div>
         <h2 className="text-lg font-semibold mb-6">{session?.user.name}</h2>
-
         <SettingsTab activeTab={activeTab} onTabChange={setActiveTab} />
       </aside>
 
