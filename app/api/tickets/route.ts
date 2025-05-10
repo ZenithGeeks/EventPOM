@@ -1,42 +1,48 @@
-// app/api/tickets/route.ts
 import { NextResponse } from "next/server";
-import path from "path";
-import fs from "fs";
+
+const BACKEND = process.env.BACKEND_URL;
 
 export async function GET() {
   try {
-    const tickets = path.join(process.cwd(), "mockdata", "tickets.json");
-    const events = path.join(process.cwd(), "mockdata", "events.json");
-    const eventsContent = fs.readFileSync(events, "utf-8");
-    const eventsData = JSON.parse(eventsContent);
-    const ticketContent = fs.readFileSync(tickets, "utf-8");
-    const ticketsData = JSON.parse(ticketContent);
-    // console.log("ticketsData", ticketsData);
-    // console.log("eventsData", eventsData);
-    ticketsData.forEach((ticket: any) => {
-        const event = getEventById(ticket.eventId, eventsData);
-        ticket.event = event;
-        console.log("ticket", ticket);
+    const response = await fetch("http://localhost:3001/getTicket", {
+      cache: "no-store",
     });
 
+    const contentType = response.headers.get("content-type");
 
-    if (!Array.isArray(ticketsData)) {
-      throw new Error("tickets.json must contain an array of tickets!");
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("❌ Backend responded with error:", response.status, errorText);
+      return new Response(JSON.stringify({ error: errorText }), {
+        status: response.status,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
-    return NextResponse.json({
-      success: true,
-      data: ticketsData,
-    });
+    // parse only if JSON
+    if (contentType?.includes("application/json")) {
+      const json = await response.json();
+      return new Response(JSON.stringify(json), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    } else {
+      // plain text fallback
+      const text = await response.text();
+      return new Response(JSON.stringify({ data: text }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
   } catch (error) {
-    console.error("Error reading tickets.json:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to load tickets" },
-      { status: 500 }
+    console.error("❌ Fetch to backend failed:", error);
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
     );
   }
-}
-
-function getEventById(id: number, events: any[]) {
-  return events.find((event) => event.eventId === id);
 }
