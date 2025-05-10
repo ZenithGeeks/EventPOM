@@ -36,6 +36,7 @@
     "net": "^1.0.2",
     "next": "15.1.7",
     "next-auth": "5.0.0-beta.25",
+    "next-qrcode": "^2.5.1",
     "nodemailer": "^6.10.0",
     "pg": "^8.13.3",
     "postgres": "^3.4.5",
