@@ -7,6 +7,8 @@ import { useSession } from "next-auth/react";
 import CreateEventForm from "../components/CreateEventForm/CreateEventForm";
 import { useRouter } from "next/navigation";
 import OrganizationDashboard from "../components/organization/dashboard/dashboard";
+import RecipientDetail from "../components/transaction/RecipientDetail";
+import TransactionHistory from "../components/transaction/TransactionHistory";
 
 export default function OrganizationPage() {
   const { data: session, status } = useSession();
@@ -62,7 +64,8 @@ export default function OrganizationPage() {
         {activeTab === "Transaction" && (
           <div>
             <h1 className="text-2xl font-bold">Transaction</h1>
-            <p className="mt-4">Transaction details go here.</p>
+            <RecipientDetail/>
+            <TransactionHistory/>
           </div>
         )}
         {activeTab === "Members" && (
