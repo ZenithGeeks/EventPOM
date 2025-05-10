@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { CalendarDaysIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import { useQRCode } from "next-qrcode";
 import Image from "next/image";
+import { useSession } from "next-auth/react";
 
 interface TicketDetailProps {
   ticket: Ticket;
@@ -14,27 +15,12 @@ interface TicketDetailProps {
 
 export default function TicketDetail({ ticket, onBack }: TicketDetailProps) {
   const { Canvas } = useQRCode();
-  const [owner, setOwner] = useState<User | null>(null);
+  
+  const { data: session } = useSession();
+  const owner = session?.user;
 
-  useEffect(() => {
-    async function fetchUser() {
-      try {
-        const res = await fetch("/api/users");
-        const data = await res.json();
-        const users: User[] = data.data;
-        const match = users.find((user) =>
-          user.tickets.some((t) => t.id === ticket.id)
-        );
-        setOwner(match || null);
-      } catch (err) {
-        console.error("Failed to fetch users:", err);
-      }
-    }
 
-    fetchUser();
-  }, [ticket.id]);
-
-  const formatShortDate = (start: Date, end: Date) => {
+  const formatShortDate = (start: string | Date, end: string | Date) => {
     const startDate = new Date(start);
     const endDate = new Date(end);
 
@@ -60,13 +46,13 @@ export default function TicketDetail({ ticket, onBack }: TicketDetailProps) {
         <div className="flex flex-col md:flex-row items-start gap-[3rem]">
 
           <div className="w-full md:w-1/4 flex justify-center">
-            <Image
-              src={ticket.event.imageUrl ?? "/placeholder.png"}
-              width={200}
-              height={250}
-              alt={ticket.event.title}
-              className="object-cover"
-            />
+          <Image
+            src={ticket.event.imageUrl ?? "/placeholder.png"}
+            width={200}
+            height={250}
+            alt={ticket.event.title || "Event Poster"}
+            className="object-cover"
+          />
           </div>
 
           <div className="flex-1">
@@ -103,12 +89,12 @@ export default function TicketDetail({ ticket, onBack }: TicketDetailProps) {
                   {ticket.price === 0 ? "Free" : `$${ticket.price}`}
                 </p>
               </div>
-              {owner && (
+              {session?.user && (
                 <div>
                   <p className="text-gray-500 font-medium pt-2">Owner Name</p>
-                  <p className="text-black font-bold">{owner.name}</p>
-                  <p className="text-gray-800 text-sm">{owner.email}</p>
-                  <p className="text-gray-800 text-sm">{owner.phone || "N/A"}</p>
+                  <p className="text-black font-bold">{session.user.name}</p>
+                  <p className="text-gray-800 text-sm">{session.user.email}</p>
+                  <p className="text-gray-800 text-sm">{session.user.phone}</p>
                 </div>
               )}
             </div>

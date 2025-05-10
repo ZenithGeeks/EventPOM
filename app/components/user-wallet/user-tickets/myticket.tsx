@@ -4,9 +4,24 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { CalendarDaysIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import { Ticket } from "@/types/models";
+import { Ticket, EventStatus } from "@/types/models";
 import TicketDetail from "./TicketDetail";
 import { useSession } from "next-auth/react";
+
+interface RawTicket {
+  id: string;
+  name: string;
+  seat?: string;
+  price: number;
+  quantity: number;
+  attendance: boolean;
+  eventId: string;
+  event_title: string;
+  event_location: string;
+  event_starttime: string;
+  event_endtime: string;
+  event_imageurl?: string;
+}
 
 
 export default function MyTicket() {
@@ -16,7 +31,7 @@ export default function MyTicket() {
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const { data: session } = useSession();
   
-  console.log("Session data:", session);
+  //console.log("Session data:", session);
 
 
   useEffect(() => {
@@ -29,24 +44,53 @@ export default function MyTicket() {
   
     async function fetchTickets() {
       try {
-        const res = await fetch("/api/tickets", {
+        const res = await fetch(`/api/tickets/${userId}`, {
           cache: "no-store",
         });
   
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (!res.ok) {
+          const text = await res.text();
+          console.error("❌ Error fetching tickets:", res.status, text);
+          return;
+        }
   
         const payload = await res.json();
-  
-        //console.log("✅ Payload from /api/tickets:", payload);
-  
-        // ✅ Filter tickets by logged-in user ID
-        const myTickets = payload.tickets?.filter((ticket: Ticket) =>
-          ticket.users?.some((user) => user.id === userId)
-        );
-  
-        setTickets(myTickets || []);
+        //console.log("😇 Raw payload:", payload);
+
+
+        const rawTickets: RawTicket[] = payload.data || [];
+        //console.log("🐛 Raw tickets:", rawTickets);
+
+
+        const mappedTickets: Ticket[] = rawTickets.map((ticket) => ({
+          ...ticket,
+          users: [],
+          orders: [],
+          event: {
+            id: ticket.eventId,
+            title: ticket.event_title,
+            location: ticket.event_location,
+            imageUrl: ticket.event_imageurl,
+            startTime: new Date(ticket.event_starttime),
+            endTime: new Date(ticket.event_endtime),
+            status: EventStatus.APPROVED,
+            description: "",
+            typeId: "",
+            tickets: [],
+            orders: [],
+            organizerId: "",
+            organizer: { id: "", name: "", users: [], events: [] },
+            eventCategory: { id: "", name: "", events: [] },
+            createdAt: new Date(),
+          },
+        }));
+
+        //console.log("✅ Mapped Tickets:", mappedTickets);
+        setTickets(mappedTickets);
+        
+
       } catch (err) {
-        console.error("Error fetching tickets:", err);
+        console.error("❌ Network error:", err);
       } finally {
         setLoading(false);
       }

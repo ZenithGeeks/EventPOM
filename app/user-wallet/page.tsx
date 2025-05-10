@@ -27,7 +27,7 @@ export default function SettingsPage() {
           }
 
         </div>
-        <h2 className="text-lg font-semibold mb-6">John Doe</h2>
+        <h2 className="text-lg font-semibold mb-6">{session?.user.name}</h2>
 
         <SettingsTab activeTab={activeTab} onTabChange={setActiveTab} />
       </aside>

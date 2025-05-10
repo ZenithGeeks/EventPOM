@@ -8,6 +8,7 @@ declare module "next-auth" {
       id: string
       imageUrl?: string
       role?: string
+      phone?: string
     } & DefaultSession["user"]
   }
 
@@ -15,6 +16,7 @@ declare module "next-auth" {
     id: string
     imageUrl?: string
     role?: string
+    phone?: string
   }
 }
 
