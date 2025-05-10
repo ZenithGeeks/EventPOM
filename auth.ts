@@ -1,4 +1,3 @@
-
 import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
 import PostgresAdapter from "@auth/pg-adapter"
@@ -51,5 +50,4 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session
     }
   },
-    
 })

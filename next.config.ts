@@ -23,6 +23,12 @@ const nextConfig: NextConfig = {
         port: "9000",
         pathname: "/**",
       },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '9000',
+        pathname: '/**',
+      },
     ],
   },
 };//add localhost protocal ***http***

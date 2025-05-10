@@ -6,13 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
 
-interface CreateOrganizerAccountProps {}
 
-export default function CreateOrganizerAccount({}: CreateOrganizerAccountProps) {
+interface CreateOrganizationAccountProps {}
+
+export default function CreateOrganizationAccount({}: CreateOrganizationAccountProps) {
   const { data: session, status } = useSession();
-  const [organizerType, setOrganizerType] = useState<"Company" | "Individual">("Company");
+  const [organizationType, setOrganizationType] = useState<"Company" | "Individual">("Company");
   const [termsAccepted, setTermsAccepted] = useState<boolean>(false);
-  const [organizerName, setOrganizerName] = useState<string>("");
+  const [organizationName, setOrganizationName] = useState<string>("");
+
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [error, setError] = useState<string>("");
 
@@ -21,8 +23,10 @@ export default function CreateOrganizerAccount({}: CreateOrganizerAccountProps) 
       setError("Please accept the terms and conditions.");
       return;
     }
-    if (!organizerName.trim()) {
-      setError("Organizer name is required.");
+
+    if (!organizationName.trim()) {
+      setError("Organization name is required.");
+
       return;
     }
     if (!phoneNumber.trim()) {
@@ -32,10 +36,12 @@ export default function CreateOrganizerAccount({}: CreateOrganizerAccountProps) 
 
     setError("");
     try {
-      const response = await fetch("/api/create-organizer", {
+
+      const response = await fetch("/api/create-organization", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ organizerType, organizerName, phoneNumber }),
+        body: JSON.stringify({ organizationType, organizationName, phoneNumber }),
+
       });
 
       if (!response.ok) {
@@ -47,7 +53,8 @@ export default function CreateOrganizerAccount({}: CreateOrganizerAccountProps) 
       console.error("Account creation error:", error);
       setError("An error occurred while creating the account.");
     }
-  }, [organizerType, organizerName, phoneNumber, termsAccepted]);
+
+  }, [organizationType, organizationName, phoneNumber, termsAccepted]);
 
   if (status === "loading") {
     return (
@@ -85,7 +92,7 @@ export default function CreateOrganizerAccount({}: CreateOrganizerAccountProps) 
                 {`Welcome, ${session?.user?.name || "User"}`}
               </h2>
               <p className="text-sm text-gray-600">
-                We will use this account to create your organizer account.
+                We will use this account to create your organization account.
               </p>
             </div>
             {session?.user?.image && (
@@ -101,7 +108,8 @@ export default function CreateOrganizerAccount({}: CreateOrganizerAccountProps) 
           </div>
 
           <h1 className="text-2xl md:text-3xl font-bold text-indigo-900 leading-tight">
-            Let's Create Your<br />Organizer Account!
+
+            Let's Create Your<br />Organization Account!
           </h1>
           <p className="text-gray-600 text-sm md:text-base">
             Publish your awesome event and sell tickets to all attendees around the world!
@@ -116,16 +124,17 @@ export default function CreateOrganizerAccount({}: CreateOrganizerAccountProps) 
           <div className="space-y-4">
             <div>
               <label
-                htmlFor="organizerName"
+
+                htmlFor="organizationName"
                 className="block text-sm font-medium text-gray-700 uppercase"
               >
-                Organizer Name
+                Organization Name
               </label>
               <Input
-                id="organizerName"
+                id="organizationName"
                 type="text"
-                value={organizerName}
-                onChange={(e) => setOrganizerName(e.target.value)}
+                value={organizationName}
+                onChange={(e) => setOrganizationName(e.target.value)}
                 className="mt-1"
                 aria-required="true"
               />
@@ -150,15 +159,18 @@ export default function CreateOrganizerAccount({}: CreateOrganizerAccountProps) 
 
             <div>
               <span className="block text-sm font-medium text-gray-700 uppercase">
-                Organizer Type
+
+                Organization Type
               </span>
               <div className="flex space-x-4 mt-1">
                 <label className="flex items-center">
                   <input
                     type="radio"
-                    name="organizerType"
-                    checked={organizerType === "Company"}
-                    onChange={() => setOrganizerType("Company")}
+
+                    name="organizationType"
+                    checked={organizationType === "Company"}
+                    onChange={() => setOrganizationType("Company")}
+
                     className="mr-2 h-5 w-5 text-indigo-900 border-gray-300 focus:ring-indigo-900"
                   />
                   Company
@@ -166,9 +178,9 @@ export default function CreateOrganizerAccount({}: CreateOrganizerAccountProps) 
                 <label className="flex items-center">
                   <input
                     type="radio"
-                    name="organizerType"
-                    checked={organizerType === "Individual"}
-                    onChange={() => setOrganizerType("Individual")}
+                    name="organizationType"
+                    checked={organizationType === "Individual"}
+                    onChange={() => setOrganizationType("Individual")}
                     className="mr-2 h-5 w-5 text-indigo-900 border-gray-300 focus:ring-indigo-900"
                   />
                   Individual

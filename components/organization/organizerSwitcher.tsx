@@ -15,7 +15,11 @@ interface Org {
   name: string;
 }
 
-export default function OrganizationSwitcher() {
+export default function OrganizationSwitcher({
+  setOrganizerId,
+}: {
+  setOrganizerId: (id: string) => void;
+}) {
   const [orgs, setOrgs] = useState<Org[]>([]);
   const [selectedOrg, setSelectedOrg] = useState<Org | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,13 +30,14 @@ export default function OrganizationSwitcher() {
       .then((data: Org[]) => {
         setOrgs(data || []);
         if (data.length > 0) setSelectedOrg(data[0]);
+        setOrganizerId(data[0]?.id || "");
       })
       .catch((err) => {
         console.error("Failed to fetch organizations:", err);
         setOrgs([]);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [setOrganizerId]);
 
   return (
     <div className="w-full ">
@@ -60,7 +65,9 @@ export default function OrganizationSwitcher() {
             orgs.map((org) => (
               <DropdownMenuItem
                 key={org.id}
-                onClick={() => setSelectedOrg(org)}
+                onClick={() => {
+                  setSelectedOrg(org)
+                  setOrganizerId(org.id)}}
                 className={selectedOrg?.id === org.id ? "bg-muted" : ""}
               >
                 <div className="font-bold">{org.name}</div>
