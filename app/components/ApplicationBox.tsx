@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { CalendarDaysIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { event } from "../components/user-wallet/user-tickets/myticket";
+import { useSession } from "next-auth/react";
 
 export type ApplicationInfo = event & {
   eventCategory: string;
@@ -14,13 +15,13 @@ const ApplicationBox = () => {
   const [activeTab, setActiveTab] = useState<"current" | "past">("current");
   const [applications, setApplications] = useState<ApplicationInfo[]>([]);
   const [loading, setLoading] = useState(true);
+  const { data: session } = useSession();
   
+  const userID = (session?.user?.id);
   useEffect(() => {
     const fetchApplications = async () => {
       try {
-        const res = await fetch(
-          "http://localhost:3001/getEventApplicationDetails"
-        );
+        const res = await fetch(`/api/eventApplication?userID=${userID}`);
         const data = await res.json();
         console.log(data);
         setApplications(data.eventApplicationDetails);
@@ -71,11 +72,10 @@ const ApplicationBox = () => {
 
   const pastApplication = applications.filter((application) => {
     const currentDate = new Date();
-    const endTime = new Date(application.endTime)
+    const endTime = new Date(application.endTime);
     return currentDate > endTime;
   });
 
-  
   return (
     <div className="p-4 md:p-6 bg-white">
       <h2 className="text-2xl font-bold text-gray-900">Applications</h2>

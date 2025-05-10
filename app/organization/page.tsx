@@ -5,12 +5,13 @@ import AppSidebar from "@/components/app-sidebar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation"; // ✅ use `next/navigation` in app directory
+import Member from "../components/Member";
 
 export default function OrganizationPage() {
   const { data: session, status } = useSession();
   const [activeTab, setActiveTab] = useState("Dashboard");
   const router = useRouter();
-
+ console.log(session)
   useEffect(() => {
     if (status === "loading") return; // wait for session to load
     if (session?.user.role !== "ORGANIZER") {

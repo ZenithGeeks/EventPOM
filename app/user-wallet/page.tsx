@@ -9,7 +9,7 @@ import ApplicationBox from "../components/ApplicationBox";
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("Tickets");
   const { data: session } = useSession();
-  console.log(session);
+ 
   return (
     <div className="flex flex-col md:flex-row bg-white">
       <aside className="w-full md:w-[25rem] bg-white pt-4 flex flex-col items-center">
