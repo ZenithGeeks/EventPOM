@@ -1,16 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { format } from "date-fns";
-import { CalendarIcon } from "@heroicons/react/24/solid";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -21,84 +14,119 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+
+interface Tag {
+  id: number;
+  name: string;
+}
 
 interface EventDetailsFormProps {
-  date?: Date;
-  setDate: (date: Date) => void;
+  startTime?: Date;
+  endTime?: Date;
+  setstartTime: (startTime: Date) => void;
+  setendTime: (endTime: Date) => void;
   setTag: (tag: string) => void;
+  settitle: (title: string) => void;
+  setdescription: (description: string) => void;
+  setlocation: (location: string) => void;
+  settypeId: (typeId: string) => void;
+  setstatus: (status: string) => void;
+  setpicture?: (file: File | null) => void;
+  tags: Tag[];
+  setCategoryId: (id: string) => void;
 }
 
 const EventDetailsForm: React.FC<EventDetailsFormProps> = ({
-  date,
-  setDate,
-  setTag,
+  startTime,
+  endTime,
+  setstartTime,
+  setendTime,
+  setCategoryId,
+  setdescription,
+  settitle,
+  setlocation,
+  tags,
 }) => {
-  const tags = ["technology", "education", "science", "talk show"];
-
   return (
-    <div className="flex flex-col gap-6 w-full">
-      <div className="flex flex-col md:flex-row gap-4 w-full">
-        <div className="flex flex-col gap-2 w-full md:w-1/2">
-          <Label className="font-bold">Event Name</Label>
-          <Input placeholder="Event Name" />
-        </div>
-        <div className="flex flex-col gap-2 w-full md:w-1/2">
-          <Label className="font-bold">Event Date</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-full justify-start text-left font-normal",
-                  !date && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {date ? format(date, "PPP") : "Pick a date"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={(day) => day && setDate(day)}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-      </div>
-
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
+      {/* Event Name */}
       <div className="flex flex-col gap-2">
-        <Label className="font-bold">Event Description</Label>
-        <Textarea placeholder="Event Description" />
+        <Label className="text-sm font-semibold text-muted-foreground">Event Name</Label>
+        <Input placeholder="e.g. Tech Future Summit" onChange={(e) => settitle(e.target.value)} />
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 w-full">
-        <div className="flex flex-col gap-2 w-full md:w-1/2">
-          <Label className="font-bold">Event Tag</Label>
-          <Select onValueChange={(value) => setTag(value)}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select tag" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Tags</SelectLabel>
-                {tags.map((tag) => (
-                  <SelectItem key={tag} value={tag}>
-                    {tag}
+      {/* Location */}
+      <div className="flex flex-col gap-2">
+        <Label className="text-sm font-semibold text-muted-foreground">Location</Label>
+        <Input placeholder="e.g. Bangkok International Hall" onChange={(e) => setlocation(e.target.value)} />
+      </div>
+
+      {/* Start Time */}
+      <div className="flex flex-col gap-2">
+        <Label className="text-sm font-semibold text-muted-foreground">Start Time</Label>
+        <DatePicker
+          selected={startTime}
+          onChange={(date: Date | null) => date && setstartTime(date)}
+          showTimeSelect
+          dateFormat="Pp"
+          placeholderText="Pick start date & time"
+          className={cn(
+            "w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          )}
+        />
+      </div>
+
+      {/* End Time */}
+      <div className="flex flex-col gap-2">
+        <Label className="text-sm font-semibold text-muted-foreground">End Time</Label>
+        <DatePicker
+          selected={endTime}
+          onChange={(date: Date | null) => date && setendTime(date)}
+          showTimeSelect
+          dateFormat="Pp"
+          placeholderText="Pick end date & time"
+          className={cn(
+            "w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          )}
+        />
+      </div>
+
+      {/* Category Dropdown */}
+      <div className="flex flex-col gap-2">
+        <Label className="text-sm font-semibold text-muted-foreground">Category</Label>
+        <Select onValueChange={(id) => setCategoryId(id)}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Categories</SelectLabel>
+              {Array.isArray(tags) && tags.length > 0 ? (
+                  tags.map((tag) => (
+                    <SelectItem key={tag.id} value={tag.id.toString()}>
+                      {tag.name}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem disabled value="0">
+                    No categories available
                   </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex flex-col gap-2 w-full md:w-1/2">
-          <Label className="font-bold">Event Location</Label>
-          <Input placeholder="Event Location" />
-        </div>
+                )}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Description - full width */}
+      <div className="flex flex-col gap-2 md:col-span-2">
+        <Label className="text-sm font-semibold text-muted-foreground">Description</Label>
+        <Textarea
+          placeholder="Tell us about your event..."
+          rows={4}
+          onChange={(e) => setdescription(e.target.value)}
+        />
       </div>
     </div>
   );
