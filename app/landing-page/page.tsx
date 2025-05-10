@@ -19,7 +19,7 @@ export default function Page() {
 
     const fetchData = async () => {
       try {
-        const res = await fetch("/api/getEvent");
+        const res = await fetch("/api/events");
         const result = await res.json();
         if (!res.ok) {
           throw new Error(result.error || "An unknown error occurred");

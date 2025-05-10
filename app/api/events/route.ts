@@ -26,3 +26,35 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: false, error: "Internal Server Error" }, { status: 500 });
   }
 }
+
+export async function GET() {
+    try {
+      const response = await fetch(`${BACKEND_URL}/getEvents`, {
+        cache: "no-store",
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Failed to fetch: ${response.status}`);
+      }
+  
+      const data = await response.json();
+  
+      return new Response(JSON.stringify(data), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    } catch (error) {
+      return new Response(
+        JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+        {
+          status: 500,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+  }
+  
