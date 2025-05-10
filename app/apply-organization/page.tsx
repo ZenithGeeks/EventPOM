@@ -62,7 +62,7 @@ export default function CreateOrganizationAccount({}: CreateOrganizationAccountP
       {/* Left Section - Welcome with Image */}
       <div className="relative w-full md:w-1/2 flex items-center justify-center p-8 text-white bg-black">
         <Image
-          src="/images/welcomeorganization.jpg"
+          src="/images/welcomeorganizer.jpg"
           alt="Event Background"
           fill
           className="object-cover opacity-50"
