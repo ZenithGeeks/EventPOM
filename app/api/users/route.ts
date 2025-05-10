@@ -1,16 +1,31 @@
-import { NextResponse } from "next/server";
-import path from "path";
-import fs from "fs";
-
 export async function GET() {
-  try {
-    const usersPath = path.join(process.cwd(), "mockdata", "users.json");
-    const content = fs.readFileSync(usersPath, "utf-8");
-    const users = JSON.parse(content);
-
-    return NextResponse.json({ success: true, data: users });
-  } catch (error) {
-    console.error("Error reading users.json:", error);
-    return NextResponse.json({ success: false, message: "Failed to load users" }, { status: 500 });
+    try {
+      const response = await fetch("http://localhost:3001/users", {
+        cache: "no-store",
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Failed to fetch: ${response.status}`);
+      }
+  
+      const data = await response.json();
+  
+      return new Response(JSON.stringify(data), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    } catch (error) {
+      return new Response(
+        JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+        {
+          status: 500,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
   }
-}
+  

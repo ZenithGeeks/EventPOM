@@ -17,11 +17,13 @@ import { usePathname } from "next/navigation";
 export default function Navbar() {
   const { data: session } = useSession();
   const pathname = usePathname();
-  const hideNavbar = ["/organization"];
+  const hideNavbar = ["/organization","/admin"];
   const userWallet = ["/user-wallet"];
   if (hideNavbar.includes(pathname)) {
     return (
-      <div></div>
+      <div>
+
+      </div>
     )
   }
   else if (userWallet.includes(pathname)) {
@@ -116,7 +118,7 @@ export default function Navbar() {
       <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           <div className="flex items-center pt-4 md:pl-[10rem]">
-            <Link href={process.env.NEXT_PUBLIC_BASE_URL || "/"}>
+            <Link href={"/landing-page"}>
               <Image
                 src="/logo.svg"
                 width={160}
@@ -150,7 +152,7 @@ export default function Navbar() {
                 <DropdownMenuItem asChild>
                   <Link href="/user-wallet">Tickets</Link>
                 </DropdownMenuItem>
-                {session?.user.role === "ORGANIZER" && (
+                {session?.user.role !== "USER" && (
                   <DropdownMenuItem asChild>
                     <Link href="/organization">Organization</Link>
                   </DropdownMenuItem>
