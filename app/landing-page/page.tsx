@@ -130,14 +130,8 @@ export default function Page() {
             {images.map((src, index) => (
               <div
                 key={index}
-                className={`absolute inset-0 transition-transform duration-[1800ms] ease-in-out ${
-                  index === currentImageIndex
-                    ? "translate-x-0 z-10"
-                    : direction === "next" && index === (currentImageIndex - 1 || images.length - 1)
-                    ? "-translate-x-full z-0"
-                    : direction === "prev" && index === (currentImageIndex + 1) % images.length
-                    ? "translate-x-full z-0"
-                    : "translate-x-full z-0"
+                className={`absolute inset-0 transition-opacity duration-500 ease-in-out ${
+                  index === currentImageIndex ? "opacity-100 z-10" : "opacity-0 z-0"
                 }`}
               >
                 <Image
