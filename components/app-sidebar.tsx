@@ -32,7 +32,7 @@ const items = [
   {
     title: "All Events",
     icon: CalendarIcon,
-    subItems: ["Event Details"],
+    subItems: ["Event Details","Create New Event"],
   },
   {
     title: "Transaction",
@@ -61,7 +61,7 @@ export default function AppSidebar({
     <Sidebar>
       <SidebarHeader>
         <div className="flex items-center justify-between gap-2 px-2">
-          <Link href={process.env.NEXT_PUBLIC_BASE_URL || "/"}>
+          <Link href={"/landing-page"}>
             <Image
               src="/logo.svg"
               width={160}

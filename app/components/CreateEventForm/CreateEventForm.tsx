@@ -3,7 +3,6 @@
 import * as React from "react";
 import PosterUpload from "./PosterUpload";
 import EventDetailsForm from "./EventDetailsForm";
-import TicketsForm from "./TicketsForm";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { Event, EventStatus } from "@/types/models"; // Import type definitions
@@ -83,7 +82,6 @@ export default function CreateEventForm() {
         </div>
         <div className="flex flex-col gap-8 w-full pt-2">
           <EventDetailsForm date={date} setDate={setDate}  setTag={setTag}/>
-          <TicketsForm />
         </div>
       </div>
 
