@@ -116,7 +116,7 @@ export default function Navbar() {
       <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           <div className="flex items-center pt-4 md:pl-[10rem]">
-            <Link href={process.env.NEXT_PUBLIC_BASE_URL || "/"}>
+            <Link href={"/landing-page"}>
               <Image
                 src="/logo.svg"
                 width={160}

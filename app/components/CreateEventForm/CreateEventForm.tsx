@@ -11,7 +11,13 @@ interface Category {
   name: string;
 }
 
-export default function CreateEventForm({ organizerId }: { organizerId: string }) {
+export default function CreateEventForm({
+  organizerId,
+  onSuccess,
+}: {
+  organizerId: string;
+  onSuccess: (eventId: string) => void;
+}) {
   const [picture, setPicture] = useState<File | null>(null);
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [endTime, setEndTime] = useState<Date | null>(null);
@@ -78,6 +84,7 @@ export default function CreateEventForm({ organizerId }: { organizerId: string }
     if (!response.ok) throw new Error(result.error || "Failed to create event");
 
     alert("Event created successfully!");
+    onSuccess(result.event.id);
     }
   } catch (err) {
     console.error("Create Event Error:", err);
@@ -87,10 +94,10 @@ export default function CreateEventForm({ organizerId }: { organizerId: string }
 
 
   return (
-    <form className="flex flex-col gap-12 pt-10 px-4" onSubmit={handleSubmit}>
+    <form className="flex flex-col gap-14 pt-10 px-4" onSubmit={handleSubmit}>
       <h1 className="text-3xl font-bold text-[#2A2A6D]">Create Event</h1>
 
-     <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 w-full">
+     <div className="grid grid-cols-1 lg:grid-cols-3 gap-32 w-full">
  <div className="w-full max-w-sm">
   <PosterUpload picture={picture} setPicture={setPicture} />
 </div>
