@@ -27,7 +27,6 @@ const ApplicationBox = () => {
       try {
         const res = await fetch(`/api/eventApplication?userID=${userID}`);
         const data = await res.json();
-        console.log(data);
         setApplications(data.eventApplicationDetails);
       } catch (err) {
         console.error("Error fetching applications:", err);
