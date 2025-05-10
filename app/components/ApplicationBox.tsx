@@ -2,12 +2,16 @@ import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDaysIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import { event } from "../components/user-wallet/user-tickets/myticket";
 import { useSession } from "next-auth/react";
 
-export type ApplicationInfo = event & {
-  eventCategory: string;
-  status: "PENDING" | "APPROVED" | "REJECTED";
+export type ApplicationInfo = {
+  location: string
+  title: string
+  imageUrl: string
+  startTime: string;
+  endTime: string;
+  name: string;
+  status: "PENDING_APPROVAL" | "APPROVED" | "REJECTED";
   createdAt: string;
 };
 
@@ -23,7 +27,6 @@ const ApplicationBox = () => {
       try {
         const res = await fetch(`/api/eventApplication?userID=${userID}`);
         const data = await res.json();
-        console.log(data);
         setApplications(data.eventApplicationDetails);
       } catch (err) {
         console.error("Error fetching applications:", err);
@@ -60,7 +63,7 @@ const ApplicationBox = () => {
     return createdDate;
   };
 
-  const currentApplication = applications.filter((application) => {
+  const currentApplication = applications.length > 0 ? applications.filter((application) => {
     const currentDate = new Date();
     const startTime = new Date(application.startTime);
     const endTime = new Date(application.endTime);
@@ -68,13 +71,13 @@ const ApplicationBox = () => {
       currentDate < startTime ||
       (currentDate >= startTime && currentDate <= endTime)
     );
-  });
+  }) : []
 
-  const pastApplication = applications.filter((application) => {
+  const pastApplication = applications.length > 0 ? applications.filter((application) => {
     const currentDate = new Date();
     const endTime = new Date(application.endTime);
     return currentDate > endTime;
-  });
+  }) : []
 
   return (
     <div className="p-4 md:p-6 bg-white">
@@ -131,7 +134,7 @@ const ApplicationBox = () => {
                         <h3 className="font-semibold text-lg">
                           {application.title}
                         </h3>
-                        <p className="text-sm">{application.eventCategory}</p>
+                        <p className="font-extralight text-sm">{application.name}</p>
                         {/* Date with calendar icon */}
                         <p className="flex items-center gap-1 text-sm text-gray-600 ">
                           <CalendarDaysIcon className="h-4 w-4 " />
@@ -143,7 +146,7 @@ const ApplicationBox = () => {
                           <MapPinIcon className="h-4 w-4" />
                           {application.location}
                         </p>
-                        {application.status === "PENDING" && (
+                        {application.status === "PENDING_APPROVAL" && (
                           <p className="text-sm text-gray-600">
                             Reviewed by:{" "}
                             {formatDate(
@@ -159,13 +162,13 @@ const ApplicationBox = () => {
                               ? "border-green-600 text-green-600"
                               : application.status === "REJECTED"
                               ? "border-red-800 text-red-800"
-                              : application.status === "PENDING"
+                              : application.status === "PENDING_APPROVAL"
                               ? "border-yellow-400 text-yellow-400"
                               : ""
                           }`}
                           variant={"outline"}
                         >
-                          {application.status}
+                          {application.status === "PENDING_APPROVAL" ? "PENDING" : application.status}
                         </Badge>
                       </div>
                     </div>
@@ -200,7 +203,7 @@ const ApplicationBox = () => {
                       <h3 className="font-semibold text-lg">
                         {application.title}
                       </h3>
-                      <p className="text-sm">{application.eventCategory}</p>
+                      <p className="text-sm">{application.name}</p>
                       <p className="flex items-center gap-1 text-sm text-gray-600">
                         <CalendarDaysIcon className="h-4 w-4" />
                         {formatDate(application.startTime)} -{" "}
