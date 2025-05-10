@@ -2,10 +2,14 @@ import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDaysIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import { event } from "../components/user-wallet/user-tickets/myticket";
 import { useSession } from "next-auth/react";
 
-export type ApplicationInfo = event & {
+export type ApplicationInfo = {
+  location: string
+  title: string
+  imageUrl: string
+  startTime: string;
+  endTime: string;
   eventCategory: string;
   status: "PENDING" | "APPROVED" | "REJECTED";
   createdAt: string;
