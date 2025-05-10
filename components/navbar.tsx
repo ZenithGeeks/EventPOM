@@ -17,11 +17,13 @@ import { usePathname } from "next/navigation";
 export default function Navbar() {
   const { data: session } = useSession();
   const pathname = usePathname();
-  const hideNavbar = ["/organization"];
+  const hideNavbar = ["/organization","/admin"];
   const userWallet = ["/user-wallet"];
   if (hideNavbar.includes(pathname)) {
     return (
-      <div></div>
+      <div>
+
+      </div>
     )
   }
   else if (userWallet.includes(pathname)) {
@@ -150,7 +152,7 @@ export default function Navbar() {
                 <DropdownMenuItem asChild>
                   <Link href="/user-wallet">Tickets</Link>
                 </DropdownMenuItem>
-                {session?.user.role === "ORGANIZER" && (
+                {session?.user.role !== "USER" && (
                   <DropdownMenuItem asChild>
                     <Link href="/organization">Organization</Link>
                   </DropdownMenuItem>
