@@ -1,4 +1,9 @@
 import React from "react";
+import Image from "next/image";
+import { useSession } from "next-auth/react";
+import { PhoneInput } from "@/components/ui/phone-input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
 interface SettingsComponentProps {
   onSave: () => void;
@@ -6,103 +11,116 @@ interface SettingsComponentProps {
 }
 
 const SettingsComponent: React.FC<SettingsComponentProps> = ({ onSave, onDeleteAccount }) => {
+  const { data: session } = useSession();
+  
   return (
     <div className="p-6 bg-white border rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4 text-indigo-700">User Settings</h2>
-      <div className="flex flex-col md:flex-row">
-        <div className="md:w-1/2">
-          <div className="mb-4">
-            <img
-              src="/default-profile.jpg"
-              alt="Profile"
-              className="w-32 h-32 rounded-full mb-2"
-            />
-            <button className="text-blue-500 underline">Upload Profile Picture</button>
-            <input type="file" accept="image/*" className="hidden" />
+      <div className="mb-4">
+        <h2 className="text-2xl font-bold text-indigo-700">User Settings</h2>
+      </div>
+      <div className="flex flex-col">
+        <div className="mb-4">
+          <img
+            src={session?.user?.image || "/default-profile.jpg"}
+            alt="Profile"
+            className="w-32 h-32 rounded-full mb-2"
+          />
+          <Button variant="link" className="text-blue-500 underline p-0">
+            Upload Profile Picture
+          </Button>
+          <input type="file" accept="image/*" className="hidden" />
+        </div>
+        <div className="flex flex-col md:flex-row md:space-x-4 mb-4">
+          <div className="md:w-1/2">
+            <label className="block text-sm font-medium text-gray-700 uppercase mb-1">First Name (as on ID Card or Passport)</label>
+            <input type="text" defaultValue={session?.user?.name?.split(" ")[0] || "Johnny"} className="w-full p-2 border rounded" />
           </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">First Name (as on ID Card or Passport)</label>
-            <input type="text" defaultValue="Johnny" className="w-full p-2 border rounded" />
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">email</label>
-            <input type="email" defaultValue="JohnDoe555@gmail.com" className="w-full p-2 border rounded" />
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Gender</label>
-            <select defaultValue="Male" className="w-full p-2 border rounded">
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-            </select>
+          <div className="md:w-1/2">
+            <label className="block text-sm font-medium text-gray-700 uppercase mb-1">Last Name (as on ID Card or Passport)</label>
+            <input type="text" defaultValue={session?.user?.name?.split(" ")[1] || "Doeman"} className="w-full p-2 border rounded" />
           </div>
         </div>
-        <div className="md:w-1/2 md:pl-4">
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Last Name (as on ID Card or Passport)</label>
-            <input type="text" defaultValue="Doeman" className="w-full p-2 border rounded" />
+        <div className="flex flex-col md:flex-row md:space-x-4 mb-4">
+          <div className="md:w-1/3">
+            <label className="block text-sm font-medium text-gray-700 uppercase mb-1">Email</label>
+            <input type="email" defaultValue={session?.user?.email || "JohnDoe555@gmail.com"} readOnly className="w-full p-2 border rounded bg-gray-100 cursor-not-allowed" />
           </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Mobile phone number</label>
-            <input type="tel" defaultValue="098 940 2414" className="w-full p-2 border rounded" />
+          <div className="md:w-1/3">
+            <label className="block text-sm font-medium text-gray-700 uppercase mb-1">Phone Number</label>
+            <PhoneInput
+              className="w-full p-2"
+              defaultCountry="TH"
+            />
           </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Birthday (Day/Month/Year)</label>
+        </div>
+        <div className="flex flex-col md:flex-row md:space-x-4 mb-4">
+          <div className="md:w-1/3">
+            <label className="block text-sm font-medium text-gray-700 uppercase mb-1">Birthday (Day/Month/Year)</label>
             <div className="flex space-x-2">
-              <select defaultValue="09" className="w-1/3 p-2 border rounded">
-                <option value="01">01</option>
-                <option value="02">02</option>
-                <option value="03">03</option>
-                <option value="04">04</option>
-                <option value="05">05</option>
-                <option value="06">06</option>
-                <option value="07">07</option>
-                <option value="08">08</option>
-                <option value="09">09</option>
-                <option value="10">10</option>
-                <option value="11">11</option>
-                <option value="12">12</option>
-              </select>
-              <select defaultValue="12" className="w-1/3 p-2 border rounded">
-                <option value="01">01</option>
-                <option value="02">02</option>
-                <option value="03">03</option>
-                <option value="04">04</option>
-                <option value="05">05</option>
-                <option value="06">06</option>
-                <option value="07">07</option>
-                <option value="08">08</option>
-                <option value="09">09</option>
-                <option value="10">10</option>
-                <option value="11">11</option>
-                <option value="12">12</option>
-              </select>
-              <select defaultValue="2000" className="w-1/3 p-2 border rounded">
-                <option value="1990">1990</option>
-                <option value="1991">1991</option>
-                <option value="1992">1992</option>
-                <option value="1993">1993</option>
-                <option value="1994">1994</option>
-                <option value="1995">1995</option>
-                <option value="1996">1996</option>
-                <option value="1997">1997</option>
-                <option value="1998">1998</option>
-                <option value="1999">1999</option>
-                <option value="2000">2000</option>
-                <option value="2001">2001</option>
-                <option value="2002">2002</option>
-              </select>
+              <Select>
+                <SelectTrigger className="w-1/3 p-2">
+                  <SelectValue placeholder="Day" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
+                    <SelectItem key={day} value={day.toString().padStart(2, "0")}>
+                      {day.toString().padStart(2, "0")}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select>
+                <SelectTrigger className="w-1/3 p-2">
+                  <SelectValue placeholder="Month" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
+                    <SelectItem key={month} value={month.toString().padStart(2, "0")}>
+                      {month.toString().padStart(2, "0")}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select>
+                <SelectTrigger className="w-1/3 p-2">
+                  <SelectValue placeholder="Year" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 13 }, (_, i) => 1990 + i).map((year) => (
+                    <SelectItem key={year} value={year.toString()}>
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="md:w-1/3">
+            <label className="block text-sm font-medium text-gray-700 uppercase mb-1">Gender</label>
+            <div className="flex space-x-4">
+              <label className="flex items-center">
+                <input type="radio" name="gender" value="Male" className="mr-2" />
+                Male
+              </label>
+              <label className="flex items-center">
+                <input type="radio" name="gender" value="Female" className="mr-2" />
+                Female
+              </label>
+              <label className="flex items-center">
+                <input type="radio" name="gender" value="Other" className="mr-2" />
+                Other
+              </label>
             </div>
           </div>
         </div>
       </div>
       <div className="flex justify-between mt-4">
-        <button onClick={onDeleteAccount} className="px-4 py-2 bg-red-500 text-white rounded">
+        <Button onClick={onDeleteAccount} variant="destructive">
           Delete Account
-        </button>
-        <button onClick={onSave} className="px-4 py-2 bg-indigo-700 text-white rounded">
+        </Button>
+        <Button onClick={onSave} variant="default" className="bg-indigo-700 text-white">
           SAVE
-        </button>
+        </Button>
       </div>
     </div>
   );
