@@ -49,9 +49,11 @@ const items = [
 export default function AppSidebar({
   activeTab,
   onTabChange,
+  setOrganizerId
 }: {
   activeTab: string;
   onTabChange: (tab: string) => void;
+  setOrganizerId: (id: string) => void;
 }) {
   const handleItemClick = (title: string) => {
     onTabChange(title);
@@ -71,7 +73,7 @@ export default function AppSidebar({
           </Link>
         </div>
         <div className="flex items-center justify-between gap-2 px-2">
-          <OrganizationSwitcher />
+          <OrganizationSwitcher setOrganizerId={setOrganizerId} />
         </div>
       </SidebarHeader>
       <SidebarContent className="overflow-y-auto py-4 px-2">

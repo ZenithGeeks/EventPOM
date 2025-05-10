@@ -10,6 +10,7 @@ import OrganizationDashboard from "../components/organization/dashboard/dashboar
 
 export default function OrganizationPage() {
   const { data: session, status } = useSession();
+  const [organizerId, setOrganizerId] = useState("");
   const [activeTab, setActiveTab] = useState("Dashboard");
   const router = useRouter();
 
@@ -26,7 +27,7 @@ export default function OrganizationPage() {
     <div className="flex flex-col md:flex-row min-h-screen bg-white">
       {/* Sidebar - hidden on small screens */}
       <div className="hidden md:block fixed top-16 left-0 h-[calc(100vh-4rem)] w-64 z-20">
-        <AppSidebar activeTab={activeTab} onTabChange={setActiveTab} />
+        <AppSidebar activeTab={activeTab} onTabChange={setActiveTab} setOrganizerId={setOrganizerId}/>
       </div>
 
       {/* Main Content */}
@@ -55,7 +56,7 @@ export default function OrganizationPage() {
         )}
         {activeTab === "Create New Event" && (
           <div>
-            <CreateEventForm />
+            <CreateEventForm organizerId={organizerId} />
           </div>
         )}
         {activeTab === "Transaction" && (
