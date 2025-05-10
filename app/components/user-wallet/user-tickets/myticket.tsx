@@ -6,30 +6,55 @@ import { CalendarDaysIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { Ticket } from "@/types/models";
 import TicketDetail from "./TicketDetail";
+import { useSession } from "next-auth/react";
+
 
 export default function MyTicket() {
   const [activeTab, setActiveTab] = useState<"active" | "past">("active");
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const { data: session } = useSession();
+  
+  console.log("Session data:", session);
+
 
   useEffect(() => {
-    console.log("tickets", tickets);
-
+    const userId = session?.user?.id;
+  
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
+  
     async function fetchTickets() {
       try {
-        const response = await fetch("/api/tickets");
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-        const originalData = await response.json();
-        setTickets(originalData.data);
-      } catch (error) {
-        console.error("Error fetching tickets:", error);
+        const res = await fetch("/api/tickets", {
+          cache: "no-store",
+        });
+  
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  
+        const payload = await res.json();
+  
+        //console.log("✅ Payload from /api/tickets:", payload);
+  
+        // ✅ Filter tickets by logged-in user ID
+        const myTickets = payload.tickets?.filter((ticket: Ticket) =>
+          ticket.users?.some((user) => user.id === userId)
+        );
+  
+        setTickets(myTickets || []);
+      } catch (err) {
+        console.error("Error fetching tickets:", err);
       } finally {
         setLoading(false);
       }
     }
+  
     fetchTickets();
-  }, []);
+  }, [session?.user?.id]);
+  
 
   const now = new Date();
 
