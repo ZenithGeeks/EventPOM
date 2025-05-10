@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
 
+
 interface CreateOrganizationAccountProps {}
 
 export default function CreateOrganizationAccount({}: CreateOrganizationAccountProps) {
@@ -13,6 +14,7 @@ export default function CreateOrganizationAccount({}: CreateOrganizationAccountP
   const [organizationType, setOrganizationType] = useState<"Company" | "Individual">("Company");
   const [termsAccepted, setTermsAccepted] = useState<boolean>(false);
   const [organizationName, setOrganizationName] = useState<string>("");
+
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [error, setError] = useState<string>("");
 
@@ -21,8 +23,10 @@ export default function CreateOrganizationAccount({}: CreateOrganizationAccountP
       setError("Please accept the terms and conditions.");
       return;
     }
+
     if (!organizationName.trim()) {
       setError("Organization name is required.");
+
       return;
     }
     if (!phoneNumber.trim()) {
@@ -32,10 +36,12 @@ export default function CreateOrganizationAccount({}: CreateOrganizationAccountP
 
     setError("");
     try {
+
       const response = await fetch("/api/create-organization", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ organizationType, organizationName, phoneNumber }),
+
       });
 
       if (!response.ok) {
@@ -47,6 +53,7 @@ export default function CreateOrganizationAccount({}: CreateOrganizationAccountP
       console.error("Account creation error:", error);
       setError("An error occurred while creating the account.");
     }
+
   }, [organizationType, organizationName, phoneNumber, termsAccepted]);
 
   if (status === "loading") {
@@ -101,6 +108,7 @@ export default function CreateOrganizationAccount({}: CreateOrganizationAccountP
           </div>
 
           <h1 className="text-2xl md:text-3xl font-bold text-indigo-900 leading-tight">
+
             Let's Create Your<br />Organization Account!
           </h1>
           <p className="text-gray-600 text-sm md:text-base">
@@ -116,6 +124,7 @@ export default function CreateOrganizationAccount({}: CreateOrganizationAccountP
           <div className="space-y-4">
             <div>
               <label
+
                 htmlFor="organizationName"
                 className="block text-sm font-medium text-gray-700 uppercase"
               >
@@ -150,15 +159,18 @@ export default function CreateOrganizationAccount({}: CreateOrganizationAccountP
 
             <div>
               <span className="block text-sm font-medium text-gray-700 uppercase">
+
                 Organization Type
               </span>
               <div className="flex space-x-4 mt-1">
                 <label className="flex items-center">
                   <input
                     type="radio"
+
                     name="organizationType"
                     checked={organizationType === "Company"}
                     onChange={() => setOrganizationType("Company")}
+
                     className="mr-2 h-5 w-5 text-indigo-900 border-gray-300 focus:ring-indigo-900"
                   />
                   Company
