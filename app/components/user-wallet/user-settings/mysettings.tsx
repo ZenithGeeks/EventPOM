@@ -74,9 +74,12 @@ const SettingsComponent: React.FC<SettingsComponentProps> = ({ onSave, onDeleteA
                   <SelectValue placeholder="Month" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
-                    <SelectItem key={month} value={month.toString().padStart(2, "0")}>
-                      {month.toString().padStart(2, "0")}
+                  {[
+                    "January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"
+                  ].map((month, index) => (
+                    <SelectItem key={month} value={(index + 1).toString().padStart(2, "0")}>
+                      {month}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -115,10 +118,10 @@ const SettingsComponent: React.FC<SettingsComponentProps> = ({ onSave, onDeleteA
         </div>
       </div>
       <div className="flex justify-between mt-4">
-        <Button onClick={onDeleteAccount} variant="destructive">
+        <Button onClick={onDeleteAccount} variant="destructive" className="hover:bg-black hover:text-white">
           Delete Account
         </Button>
-        <Button onClick={onSave} variant="default" className="bg-indigo-700 text-white">
+        <Button onClick={onSave} variant="default" className="bg-indigo-700 text-white w-[240px]">
           SAVE
         </Button>
       </div>
