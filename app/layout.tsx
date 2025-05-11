@@ -26,7 +26,7 @@ export default function RootLayout({
         <SessionProvider>
           <AppProviders>
             <Navbar />
-            <Toaster />
+            <Toaster position="top-center"/>
             {children}
           </AppProviders>
         </SessionProvider>

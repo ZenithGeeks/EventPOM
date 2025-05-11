@@ -157,6 +157,11 @@ export default function Navbar() {
                     <Link href="/organization">Organization</Link>
                   </DropdownMenuItem>
                 )}
+                  {session?.user.role === "ADMIN" && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin">Admin</Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem asChild>
                   <Link href="/user-wallet">Profile</Link>
                 </DropdownMenuItem>
