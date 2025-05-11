@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { PlusCircleIcon, Trash2Icon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import toast from "react-hot-toast";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface Category {
   id: number;
@@ -39,7 +40,7 @@ export default function CategoryTab() {
       fetchCategories();
       toast.success("Category created successfully");
     } else {
-        toast.error("Failed to create category");
+      toast.error("Failed to create category");
     }
   };
 
@@ -52,7 +53,7 @@ export default function CategoryTab() {
       toast.success("Category deleted successfully");
       fetchCategories();
     } else {
-        toast.error("Failed to delete category");
+      toast.error("Failed to delete category");
     }
   };
 
@@ -61,66 +62,81 @@ export default function CategoryTab() {
   }, []);
 
   return (
-    <Card className="w-full shadow-lg border rounded-xl">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-2xl font-bold">Manage Event Categories</CardTitle>
-        <p className="text-sm text-muted-foreground">Create and manage event categories for organizers.</p>
-      </CardHeader>
-      <Separator />
-      <CardContent className="space-y-6 pt-6">
-        <div className="flex items-end gap-4">
-          <div className="flex flex-col w-full max-w-sm gap-2">
-            <Label htmlFor="categoryName">Add New Category</Label>
-            <Input
-              id="categoryName"
-              placeholder="e.g. Technology, Music, Sports"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-            />
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
+      <Card className="w-full shadow-lg border rounded-xl">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-2xl font-bold">Manage Event Categories</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Create and manage event categories for organizers.
+          </p>
+        </CardHeader>
+        <Separator />
+        <CardContent className="space-y-6 pt-6">
+          <div className="flex items-end gap-4">
+            <div className="flex flex-col w-full max-w-sm gap-2">
+              <Label htmlFor="categoryName">Add New Category</Label>
+              <Input
+                id="categoryName"
+                placeholder="e.g. Technology, Music, Sports"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+              />
+            </div>
+            <Button
+              onClick={createCategory}
+              className="mt-1 h-10"
+              disabled={!newName.trim()}
+            >
+              <PlusCircleIcon className="w-4 h-4 mr-2" /> Add
+            </Button>
           </div>
-          <Button
-            onClick={createCategory}
-            className="mt-1 h-10"
-            disabled={!newName.trim()}
-          >
-            <PlusCircleIcon className="w-4 h-4 mr-2" /> Add
-          </Button>
-        </div>
 
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-20">ID</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {categories.map((category) => (
-                <TableRow key={category.id}>
-                  <TableCell className="font-medium text-muted-foreground">{category.id}</TableCell>
-                  <TableCell>
-                    <Badge>
-                        {category.name}
-                    </Badge>
-
-                    </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => deleteCategory(category.id)}
-                    >
-                      <Trash2Icon className="w-4 h-4" />
-                    </Button>
-                  </TableCell>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-20">ID</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
-    </Card>
+              </TableHeader>
+              <TableBody>
+                <AnimatePresence>
+                  {categories.map((category) => (
+                    <motion.tr
+                      key={category.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <TableCell className="font-medium text-muted-foreground">
+                        {category.id}
+                      </TableCell>
+                      <TableCell>
+                        <Badge>{category.name}</Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => deleteCategory(category.id)}
+                        >
+                          <Trash2Icon className="w-4 h-4" />
+                        </Button>
+                      </TableCell>
+                    </motion.tr>
+                  ))}
+                </AnimatePresence>
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
