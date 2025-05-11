@@ -93,7 +93,6 @@ export default function EventsTable() {
         <h2 className="text-xl font-semibold">Events</h2>
         <p className="text-sm text-muted-foreground">{events.length} events</p>
       </div>
-      <Toaster position="top-right" />
 
       <Table>
         <TableHeader>
