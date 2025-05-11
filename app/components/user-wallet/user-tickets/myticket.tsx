@@ -7,6 +7,7 @@ import Image from "next/image";
 import { Ticket, EventStatus } from "@/types/models";
 import TicketDetail from "./TicketDetail";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 interface RawTicket {
   id: string;
@@ -23,93 +24,83 @@ interface RawTicket {
   event_imageurl?: string;
 }
 
-
 export default function MyTicket() {
   const [activeTab, setActiveTab] = useState<"active" | "past">("active");
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const { data: session } = useSession();
-  
-  //console.log("Session data:", session);
-
+  const router = useRouter();
 
   useEffect(() => {
     const userId = session?.user?.id;
-  
+
     if (!userId) {
       setLoading(false);
       return;
     }
-  
+
     async function fetchTickets() {
       try {
         const res = await fetch(`/api/tickets/${userId}`, {
           cache: "no-store",
         });
-  
+
         if (!res.ok) {
-          const text = await res.text();
-          console.error("❌ Error fetching tickets:", res.status, text);
+          const errorText = await res.text();
+          console.error("❌ Error fetching tickets:", res.status, errorText);
+          setLoading(false);
           return;
         }
-  
+
         const payload = await res.json();
-        //console.log("😇 Raw payload:", payload);
-
-
         const rawTickets: RawTicket[] = payload.data || [];
-        //console.log("🐛 Raw tickets:", rawTickets);
 
-
-        const mappedTickets: Ticket[] = rawTickets.map((ticket) => ({
-          ...ticket,
+        const mappedTickets: Ticket[] = rawTickets.map((t) => ({
+          id: t.id,
+          name: t.name,
+          seat: t.seat,
+          price: t.price,
+          quantity: t.quantity,
+          attendance: t.attendance,
           users: [],
           orders: [],
+          eventId: t.eventId,
           event: {
-            id: ticket.eventId,
-            title: ticket.event_title,
-            location: ticket.event_location,
-            imageUrl: ticket.event_imageurl,
-            startTime: new Date(ticket.event_starttime),
-            endTime: new Date(ticket.event_endtime),
+            id: t.eventId,
+            title: t.event_title,
+            location: t.event_location,
+            imageUrl: t.event_imageurl,
+            startTime: new Date(t.event_starttime),
+            endTime: new Date(t.event_endtime),
             status: EventStatus.APPROVED,
             description: "",
             typeId: "",
-            tickets: [],
-            orders: [],
+            eventCategory: "",
             organizerId: "",
-            organizer: { id: "", name: "", users: [], events: [] },
-            eventCategory: { id: "", name: "", events: [] },
             createdAt: new Date(),
           },
         }));
 
-        //console.log("✅ Mapped Tickets:", mappedTickets);
         setTickets(mappedTickets);
-        
-
       } catch (err) {
         console.error("❌ Network error:", err);
       } finally {
         setLoading(false);
       }
     }
-  
+
     fetchTickets();
   }, [session?.user?.id]);
-  
 
   const now = new Date();
 
-const activeTickets = tickets.filter(
-  (ticket) => ticket.event?.endTime && new Date(ticket.event.endTime) >= now
-);
-
-const pastTickets = tickets.filter(
-  (ticket) => ticket.event?.endTime && new Date(ticket.event.endTime) < now
-);
-
+  const activeTickets = tickets.filter(
+    (ticket) => ticket.event.endTime >= now
+  );
+  const pastTickets = tickets.filter(
+    (ticket) => ticket.event.endTime < now
+  );
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -128,7 +119,12 @@ const pastTickets = tickets.filter(
   }
 
   if (selectedTicket) {
-    return <TicketDetail ticket={selectedTicket} onBack={() => setSelectedTicket(null)} />;
+    return (
+      <TicketDetail
+        ticket={selectedTicket}
+        onBack={() => setSelectedTicket(null)}
+      />
+    );
   }
 
   const renderTickets = (list: Ticket[]) => (
@@ -144,10 +140,12 @@ const pastTickets = tickets.filter(
             width={150}
             height={100}
             alt={`Image for event ${ticket.event.title}`}
-            className="object-cover "
+            className="object-cover"
           />
           <div className="flex-1 space-y-4">
-            <h3 className="font-semibold text-lg">{ticket.event.title}</h3>
+            <h3 className="font-semibold text-lg">
+              {ticket.event.title}
+            </h3>
             <p className="flex items-center gap-1 text-sm text-gray-600">
               <CalendarDaysIcon className="h-4 w-4" />
               {formatDate(ticket.event.startTime.toString())} -{" "}
@@ -157,7 +155,10 @@ const pastTickets = tickets.filter(
               <MapPinIcon className="h-4 w-4" />
               {ticket.event.location}
             </p>
-            <Button variant="content" onClick={() => setSelectedTicket(ticket)}>
+            <Button
+              variant="content"
+              onClick={() => setSelectedTicket(ticket)}
+            >
               View details
             </Button>
           </div>
@@ -196,21 +197,35 @@ const pastTickets = tickets.filter(
 
         <div className="p-6 text-center">
           {activeTab === "active" ? (
-            activeTickets?.length > 0 ? (
+            activeTickets.length > 0 ? (
               renderTickets(activeTickets)
             ) : (
               <div>
-                <p className="text-lg font-semibold">You haven&apos;t bought any ticket</p>
-                <p className="text-gray-500">Click here to view events</p>
-                <Button className="mt-4" variant="content">View events</Button>
+                <p className="text-lg font-semibold">
+                  You haven&apos;t bought any ticket
+                </p>
+                <p className="text-gray-500">
+                  Click here to view events
+                </p>
+                <Button
+                  className="mt-4"
+                  variant="content"
+                  onClick={() => router.push("/landing-page")}
+                >
+                  View events
+                </Button>
               </div>
             )
           ) : pastTickets.length > 0 ? (
             renderTickets(pastTickets)
           ) : (
             <div>
-              <p className="text-lg font-semibold">No past tickets found</p>
-              <p className="text-gray-500">You haven&apos;t attended any events yet</p>
+              <p className="text-lg font-semibold">
+                No past tickets found
+              </p>
+              <p className="text-gray-500">
+                You haven&apos;t attended any events yet
+              </p>
             </div>
           )}
         </div>

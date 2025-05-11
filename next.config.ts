@@ -15,19 +15,26 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "lh3.googleusercontent.com",
-        pathname: "/**",
+                pathname: "/**",
       },
        {
         protocol: "http",
         hostname: "localhost",
         port: "9000",
         pathname: "/**",
+        
+      },
+         {
+        protocol: "http",
+        hostname: "localhost",
+        port: "9001",
+        pathname: "/**",
+        
       },
         {
         protocol: "https",
         hostname: "storage.googleapis.com",
-        pathname: "/**",
-      },
+                pathname: "/**",
     ],
   },
 };//add localhost protocal *http***

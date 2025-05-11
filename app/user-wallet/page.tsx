@@ -21,7 +21,7 @@ export default function SettingsPage() {
   };
  
   return (
-    <div className="flex flex-col md:flex-row bg-white">
+    <div className="flex flex-col md:flex-row bg-white py-20">
       <aside className="w-full md:w-[25rem] bg-white pt-4 flex flex-col items-center">
         <div className="mb-4">
           {session?.user ? (
