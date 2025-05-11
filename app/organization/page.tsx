@@ -96,7 +96,7 @@ export default function OrganizationPage() {
         )}
         {activeTab === "Members" && (
           <div>
-            <Member />
+            <Member organizerId={organizerId}/>
           </div>
         )}
       </main>

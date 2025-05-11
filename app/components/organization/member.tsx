@@ -14,6 +14,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -29,6 +31,7 @@ import { Pencil, ChevronDown, ChevronUp } from "lucide-react";
 import Image from "next/image";
 import { Fragment, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import toast from "react-hot-toast";
 
 interface User {
   id: string;
@@ -38,15 +41,20 @@ interface User {
   image: string | null;
   phone?: string | null;
   address?: string | null;
+  lastActiveAt?: string | null;
 }
 
-export default function Member() {
+export default function Member({ organizerId }: { organizerId: string }) {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [formData, setFormData] = useState<Partial<User>>({});
   const [dialogOpen, setDialogOpen] = useState(false);
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortByRole, setSortByRole] = useState(false);
+  const [newMemberEmail, setNewMemberEmail] = useState("");
+  const [dialogAddMemberOpen, setDialogAddmemberOpen] = useState(false);
 
   const toggleRow = (id: string) => {
     setExpandedRowId((prev) => (prev === id ? null : id));
@@ -54,8 +62,8 @@ export default function Member() {
 
   useEffect(() => {
     const loadUsers = async () => {
-      try {
-        const res = await fetch("/api/users", { cache: "no-store" });
+      try { // use /api/getUsersByOrganizationId?organizerId=bc984441-954e-4ebb-a0a1-4a51db9d9e7d` to test if there is no migration
+        const res = await fetch(`/api/getUsersByOrganizationId?=${organizerId}`, { cache: "no-store" });
         const data = await res.json();
         setUsers(data.users);
       } catch (err) {
@@ -102,21 +110,156 @@ export default function Member() {
     }
   };
 
-  if (loading) return <div className="p-6 text-center">Loading users...</div>;
+  const handleDelete = async (id: string) => {
+    const confirmed = confirm("Are you sure you want to delete this user?");
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`/api/users/${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        setUsers((prev) => prev?.filter((u) => u.id !== id));
+      } else {
+        toast.error("Failed to delete user");
+      }
+    } catch (err) {
+      console.error("Error deleting user:", err);
+    }
+  };
+
+  const filteredUsers = users
+    ?.filter((user) => {
+      const q = searchQuery.toLowerCase();
+      return (
+        user.name?.toLowerCase().includes(q) ||
+        user.email.toLowerCase().includes(q)
+      );
+    })
+    .sort((a, b) => {
+      if (!sortByRole) return 0;
+      return a.role.localeCompare(b.role);
+    });
+
+  if (loading) {
+    return (
+      <div className="flex justify-center p-10 text-gray-500">
+        <svg
+          className="animate-spin h-5 w-5 mr-3 text-gray-600"
+          viewBox="0 0 24 24"
+          fill="none"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          ></circle>
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+          ></path>
+        </svg>
+        Loading users...
+      </div>
+    );
+  }
+  const handleAddMember = async () => {
+    if (!newMemberEmail.trim()) return;
+
+    try {
+      const res = await fetch("/api/postUserByOrganizationId", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: newMemberEmail }),
+      });
+
+      if (res.ok) {
+        const added = await res.json();
+        setUsers((prev) => [...prev, added.user]);
+        setDialogOpen(false);
+      } else {
+        console.error("Failed to add member");
+      }
+    } catch (err) {
+      console.error("Error adding member:", err);
+    }
+  };
 
   return (
     <>
-      <h1 className="text-2xl font-semibold mb-4">Member</h1>
+      <div className="flex w-full justify-between">
+        <h1 className="text-2xl font-semibold mb-3">Members</h1>
+        <Dialog
+          open={dialogAddMemberOpen}
+          onOpenChange={setDialogAddmemberOpen}
+        >
+          <DialogTrigger asChild>
+            <Button
+              onClick={() => {
+                setDialogAddmemberOpen(true);
+                setNewMemberEmail(""); // Reset input on open
+              }}
+              className="bg-[#2A2A6D] text-white rounded-md hover:bg-opacity-90"
+            >
+              Add Member
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Member</DialogTitle>
+              <DialogDescription>
+                Enter the email of the new member.
+              </DialogDescription>
+            </DialogHeader>
+
+            <Input
+              placeholder="Enter email"
+              value={newMemberEmail}
+              onChange={(e) => setNewMemberEmail(e.target.value)}
+            />
+
+            <DialogFooter className="mt-4">
+              <Button
+                variant="outline"
+                onClick={() => setDialogAddmemberOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleAddMember}>Save</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="w-[50rem] mx-auto rounded-xl border bg-white p-6 shadow-sm"
+        className="w-[55rem] mx-auto rounded-xl border bg-white p-6 shadow-sm"
       >
         <div className="flex justify-between items-center mb-4">
-          <span className="text-sm text-muted-foreground">
-            {users?.length} users
-          </span>
+          <h2 className="text-xl font-semibold">All Members</h2>
+          <div className="flex gap-2 items-center">
+            <Input
+              placeholder="Search by name or email..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-64"
+            />
+            <Button
+              variant="outline"
+              onClick={() => setSortByRole((prev) => !prev)}
+            >
+              Sort by Role {sortByRole ? "↓" : "↑"}
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              {filteredUsers?.length ? `${filteredUsers.length} members` : "0 member"}
+            </span>
+          </div>
         </div>
 
         <Table>
@@ -130,7 +273,7 @@ export default function Member() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users?.map((user) => (
+            {filteredUsers?.map((user) => (
               <Fragment key={user.id}>
                 <TableRow>
                   <TableCell>
@@ -166,23 +309,32 @@ export default function Member() {
                       variant="outline"
                       className={
                         user.role === "ADMIN"
-                          ? "bg-[#DBFCE6] text-black"
+                          ? "bg-green-100 text-green-800"
                           : user.role === "ORGANIZER"
-                          ? "bg-[#F9F5C5] text-black"
-                          : "bg-white"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : user.role === "ORGANIZER_STAFF"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-gray-100 text-gray-800"
                       }
                     >
                       {user.role}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-sm">{user.email}</TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right flex gap-1 justify-end">
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => handleEdit(user)}
                     >
                       <Pencil className="w-4 h-4 text-muted-foreground" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDelete(user.id)}
+                    >
+                      🗑️
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -226,9 +378,35 @@ export default function Member() {
                               </a>
                             </div>
                           )}
-                          {!user.phone && !user.address && !user.image && (
-                            <em>No additional details</em>
+                          {user.lastActiveAt && (
+                            <div>
+                              <strong>Status:</strong>{" "}
+                              <span
+                                className={`inline-block w-2 h-2 rounded-full mr-1 ${
+                                  new Date(user.lastActiveAt) >
+                                  new Date(Date.now() - 3 * 60 * 1000)
+                                    ? "bg-green-500"
+                                    : "bg-gray-400"
+                                }`}
+                              ></span>
+                              {new Date(user.lastActiveAt) >
+                              new Date(Date.now() - 3 * 60 * 1000)
+                                ? "Online"
+                                : `Last seen at ${new Date(
+                                    user.lastActiveAt
+                                  ).toLocaleString("en-TH", {
+                                    timeZone: "Asia/Bangkok",
+                                    dateStyle: "short",
+                                    timeStyle: "short",
+                                  })}`}
+                            </div>
                           )}
+                          {!user.phone &&
+                            !user.address &&
+                            !user.image &&
+                            !user.lastActiveAt && (
+                              <em>No additional details</em>
+                            )}
                         </motion.div>
                       </td>
                     </motion.tr>
@@ -240,7 +418,6 @@ export default function Member() {
         </Table>
       </motion.div>
 
-      {/* Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
