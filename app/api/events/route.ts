@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000"; // Your Elysia backend
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3001"; // Your Elysia backend
 
 export async function POST(req: Request) {
   try {
