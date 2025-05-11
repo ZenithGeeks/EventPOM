@@ -17,20 +17,19 @@ const nextConfig: NextConfig = {
         hostname: "lh3.googleusercontent.com",
         pathname: "/**",
       },
-      {
+       {
         protocol: "http",
         hostname: "localhost",
         port: "9000",
         pathname: "/**",
       },
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '9000',
-        pathname: '/**',
+        {
+        protocol: "http",
+        hostname: "localhost",
+        port: "9001",
       },
     ],
   },
-};
+};//add localhost protocal ***http***
 
 export default nextConfig;

@@ -4,25 +4,23 @@ import { useEffect, useState } from "react";
 import AppSidebar from "@/components/app-sidebar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useSession } from "next-auth/react";
-import CreateEventForm from "../components/CreateEventForm/CreateEventForm";
 import { useRouter } from "next/navigation";
 import OrganizationDashboard from "../components/organization/dashboard/dashboard";
 import RecipientDetail from "../components/transaction/RecipientDetail";
 import TransactionHistory from "../components/transaction/TransactionHistory";
 import type { Payment } from "@/types/models";
+import EventApplicationWizard from "../components/CreateEventForm/EventApplicationWizard";
 
 export default function OrganizationPage() {
   const { data: session, status } = useSession();
   const [organizerId, setOrganizerId] = useState("");
   const [activeTab, setActiveTab] = useState("Dashboard");
   const router = useRouter();
-//NEW
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loadingPayments, setLoadingPayments] = useState(false);
-
   useEffect(() => {
     if (status === "loading") return;
-    if (session?.user.role !== "ORGANIZER") {
+    if (session?.user.role === "USER") {
       router.push("/landing-page");
     }
   }, [session, status, router]);
@@ -56,7 +54,7 @@ export default function OrganizationPage() {
       {/* Main Content */}
       <main className="flex-1 w-full md:ml-32 px-4 sm:px-8 md:px-12 py-8">
         {/* Show sidebar trigger button on small screens */}
-        <div className="md:hidden flex justify-end mb-4">
+        <div className="absolute top-4 right-4  flex justify-end mb-4">
           <SidebarTrigger />
         </div>
 
@@ -79,7 +77,7 @@ export default function OrganizationPage() {
         )}
         {activeTab === "Create New Event" && (
           <div>
-            <CreateEventForm organizerId={organizerId} />
+            <EventApplicationWizard organizerId={organizerId} />
           </div>
         )}
         {activeTab === "Transaction" && (

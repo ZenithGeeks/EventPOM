@@ -6,36 +6,47 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
 
-interface CreateOrganizerAccountProps {}
+interface CreateOrganizationAccountProps {}
 
-export default function CreateOrganizerAccount({}: CreateOrganizerAccountProps) {
+export default function CreateOrganizationAccount({}: CreateOrganizationAccountProps) {
   const { data: session, status } = useSession();
-  const [organizerType, setOrganizerType] = useState<"Company" | "Individual">("Company");
+  const [organizationType, setOrganizationType] = useState<"Company" | "Individual">("Company");
   const [termsAccepted, setTermsAccepted] = useState<boolean>(false);
-  const [organizerName, setOrganizerName] = useState<string>("");
+  const [organizationName, setOrganizationName] = useState<string>("");
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const [verificationDoc, setVerificationDoc] = useState<File | null>(null);
 
   const handleCreateAccount = useCallback(async () => {
     if (!termsAccepted) {
       setError("Please accept the terms and conditions.");
       return;
     }
-    if (!organizerName.trim()) {
-      setError("Organizer name is required.");
+
+    if (!organizationName.trim()) {
+      setError("Organization name is required.");
       return;
     }
     if (!phoneNumber.trim()) {
       setError("Phone number is required.");
       return;
     }
+    if (!verificationDoc) {
+      setError("Verification document is required.");
+      return;
+    }
 
     setError("");
     try {
-      const response = await fetch("/api/create-organizer", {
+      const formData = new FormData();
+      formData.append("organizationType", organizationType);
+      formData.append("organizationName", organizationName);
+      formData.append("phoneNumber", phoneNumber);
+      formData.append("verificationDoc", verificationDoc);
+
+      const response = await fetch("/api/create-organization", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ organizerType, organizerName, phoneNumber }),
+        body: formData,
       });
 
       if (!response.ok) {
@@ -47,7 +58,7 @@ export default function CreateOrganizerAccount({}: CreateOrganizerAccountProps) 
       console.error("Account creation error:", error);
       setError("An error occurred while creating the account.");
     }
-  }, [organizerType, organizerName, phoneNumber, termsAccepted]);
+  }, [organizationType, organizationName, phoneNumber, termsAccepted, verificationDoc]);
 
   if (status === "loading") {
     return (
@@ -85,11 +96,11 @@ export default function CreateOrganizerAccount({}: CreateOrganizerAccountProps) 
                 {`Welcome, ${session?.user?.name || "User"}`}
               </h2>
               <p className="text-sm text-gray-600">
-                We will use this account to create your organizer account.
+                We will use this account to create your organization account.
               </p>
             </div>
             {session?.user?.image && (
-              <div className="relative w-10 h-10">
+              <div className="relative w-14 h-14">
                 <Image
                   src={session.user.image}
                   alt="User Profile"
@@ -101,7 +112,7 @@ export default function CreateOrganizerAccount({}: CreateOrganizerAccountProps) 
           </div>
 
           <h1 className="text-2xl md:text-3xl font-bold text-indigo-900 leading-tight">
-            Let's Create Your<br />Organizer Account!
+            Let's Create Your<br />Organization Account!
           </h1>
           <p className="text-gray-600 text-sm md:text-base">
             Publish your awesome event and sell tickets to all attendees around the world!
@@ -116,16 +127,16 @@ export default function CreateOrganizerAccount({}: CreateOrganizerAccountProps) 
           <div className="space-y-4">
             <div>
               <label
-                htmlFor="organizerName"
+                htmlFor="organizationName"
                 className="block text-sm font-medium text-gray-700 uppercase"
               >
-                Organizer Name
+                Organization Name
               </label>
               <Input
-                id="organizerName"
+                id="organizationName"
                 type="text"
-                value={organizerName}
-                onChange={(e) => setOrganizerName(e.target.value)}
+                value={organizationName}
+                onChange={(e) => setOrganizationName(e.target.value)}
                 className="mt-1"
                 aria-required="true"
               />
@@ -149,16 +160,52 @@ export default function CreateOrganizerAccount({}: CreateOrganizerAccountProps) 
             </div>
 
             <div>
+              <div className="flex flex-col">
+                <label
+                  htmlFor="verificationDoc"
+                  className="text-sm font-medium text-gray-700 uppercase"
+                >
+                  Upload Verification Document
+                </label>
+                <span className="text-xs text-gray-700">
+                  (National ID Card / Passport)
+                </span>
+              </div>
+              <div className="mt-1 flex items-center">
+                <input
+                  id="verificationDoc"
+                  type="file"
+                  accept="application/pdf,image/*"
+                  onChange={(e) => setVerificationDoc(e.target.files?.[0] || null)}
+                  className="hidden"
+                />
+                <Button
+                  variant="outline"
+                  size="default"
+                  onClick={() => document.getElementById("verificationDoc")?.click()}
+                  className="mr-2"
+                >
+                  Upload files
+                </Button>
+                {verificationDoc && (
+                  <span className="text-sm text-gray-600">
+                    {verificationDoc.name} ({(verificationDoc.size / 1024).toFixed(2)} KB)
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div>
               <span className="block text-sm font-medium text-gray-700 uppercase">
-                Organizer Type
+                Organization Type
               </span>
               <div className="flex space-x-4 mt-1">
                 <label className="flex items-center">
                   <input
                     type="radio"
-                    name="organizerType"
-                    checked={organizerType === "Company"}
-                    onChange={() => setOrganizerType("Company")}
+                    name="organizationType"
+                    checked={organizationType === "Company"}
+                    onChange={() => setOrganizationType("Company")}
                     className="mr-2 h-5 w-5 text-indigo-900 border-gray-300 focus:ring-indigo-900"
                   />
                   Company
@@ -166,9 +213,9 @@ export default function CreateOrganizerAccount({}: CreateOrganizerAccountProps) 
                 <label className="flex items-center">
                   <input
                     type="radio"
-                    name="organizerType"
-                    checked={organizerType === "Individual"}
-                    onChange={() => setOrganizerType("Individual")}
+                    name="organizationType"
+                    checked={organizationType === "Individual"}
+                    onChange={() => setOrganizationType("Individual")}
                     className="mr-2 h-5 w-5 text-indigo-900 border-gray-300 focus:ring-indigo-900"
                   />
                   Individual
@@ -194,7 +241,7 @@ export default function CreateOrganizerAccount({}: CreateOrganizerAccountProps) 
               variant="default"
               size="default"
               onClick={handleCreateAccount}
-              disabled={!termsAccepted}
+              disabled={!termsAccepted || !verificationDoc}
               className="w-full py-3 font-semibold tracking-wide uppercase bg-indigo-900 text-white hover:bg-indigo-800 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
             >
               Create Account
