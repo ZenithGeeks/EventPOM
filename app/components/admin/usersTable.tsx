@@ -110,7 +110,7 @@ export default function UserTable() {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">All Users</h2>
           <span className="text-sm text-muted-foreground">
-            {users.length} users
+            {users?.length} users
           </span>
         </div>
 
@@ -125,7 +125,7 @@ export default function UserTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users.map((user) => (
+            {users?.map((user) => (
                 <Fragment key={user.id}>
                 <TableRow>
                   <TableCell>
@@ -151,7 +151,7 @@ export default function UserTable() {
                           {user.name || "Unnamed User"}
                         </span>
                         <span className="text-xs text-muted-foreground">
-                          @{user.email.split("@")[0]}
+                          @{user?.email?.split("@")[0]}
                         </span>
                       </div>
                     </div>
