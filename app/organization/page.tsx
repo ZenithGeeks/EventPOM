@@ -10,6 +10,7 @@ import RecipientDetail from "../components/transaction/RecipientDetail";
 import TransactionHistory from "../components/transaction/TransactionHistory";
 import type { Payment } from "@/types/models";
 import EventApplicationWizard from "../components/CreateEventForm/EventApplicationWizard";
+import Member from "../components/organization/member";
 
 export default function OrganizationPage() {
   const { data: session, status } = useSession();
@@ -95,8 +96,7 @@ export default function OrganizationPage() {
         )}
         {activeTab === "Members" && (
           <div>
-            <h1 className="text-2xl font-bold">Members</h1>
-            <p className="mt-4">Member management section.</p>
+            <Member/>
           </div>
         )}
       </main>

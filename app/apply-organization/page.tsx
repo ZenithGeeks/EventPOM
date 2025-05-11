@@ -9,9 +9,9 @@ import { CustomUI } from "@/components/ui/dropzone";
 import { FaFilePdf, FaFileImage } from "react-icons/fa";
 import { FaFileAlt } from "react-icons/fa";
 
-interface CreateOrganizationAccountProps {}
+interface CreateOrganizationAccountProps { }
 
-export default function CreateOrganizationAccount({}: CreateOrganizationAccountProps) {
+export default function CreateOrganizationAccount({ }: CreateOrganizationAccountProps) {
   const { data: session, status } = useSession();
   const [organizationType, setOrganizationType] = useState<"Company" | "Individual">("Company");
   const [termsAccepted, setTermsAccepted] = useState<boolean>(false);
@@ -146,13 +146,20 @@ export default function CreateOrganizationAccount({}: CreateOrganizationAccountP
 
           <div className="space-y-4">
             <div>
-              <label
-                htmlFor="organizationName"
-                className="block text-sm font-medium text-gray-700 uppercase"
-              >
-                Organization Name
-              </label>
-                    <div className="flex flex-row justify-center items-center">
+              <div className="flex flex-row">
+                <label
+                  htmlFor="organizationName"
+                  className="block text-sm font-medium text-gray-700 uppercase"
+                >
+                  Organization Name
+                </label>
+                {errors.organizationName && (
+                  <p className="text-red-600 text-[12px] ml-2" role="alert">
+                    {errors.organizationName}
+                  </p>
+                )}
+              </div>
+              <div className="flex flex-row justify-center items-center">
                 <Input
                   id="organizationName"
                   type="text"
@@ -161,21 +168,23 @@ export default function CreateOrganizationAccount({}: CreateOrganizationAccountP
                   className="mt-1"
                   aria-required="true"
                 />
-                {errors.organizationName && (
-                  <p className="text-red-600 text-[12px] ml-2" role="alert">
-                    {errors.organizationName}
-                  </p>
-                )}
               </div>
             </div>
 
             <div>
-              <label
-                htmlFor="phoneNumber"
-                className="block text-sm font-medium text-gray-700 uppercase"
-              >
-                Phone Number
-              </label>
+              <div className="flex flex-row">
+                <label
+                  htmlFor="phoneNumber"
+                  className="block text-sm font-medium text-gray-700 uppercase"
+                >
+                  Phone Number
+                </label>
+                {errors.phoneNumber && (
+                  <p className="text-red-600 text-[12px] ml-2" role="alert">
+                    {errors.phoneNumber}
+                  </p>
+                )}
+              </div>
               <div className="flex flex-row justify-center items-center">
                 <PhoneInput
                   id="phoneNumber"
@@ -185,11 +194,6 @@ export default function CreateOrganizationAccount({}: CreateOrganizationAccountP
                   defaultCountry="TH"
                   aria-required="true"
                 />
-                {errors.phoneNumber && (
-                  <p className="text-red-600 text-[12px] ml-2" role="alert">
-                    {errors.phoneNumber}
-                  </p>
-                )}
               </div>
             </div>
 

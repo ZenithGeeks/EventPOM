@@ -29,7 +29,7 @@ export default function Buy() {
                 const res = await fetch(`/api/getEventByID?id=${id}`)
                 const result = await res.json()
                 setEventByID(result.event)
-
+                console.log(result)
                 if (!res.ok) {
                     throw new Error(result.error || 'An unknown error occurred')
                 }
@@ -158,14 +158,14 @@ export default function Buy() {
                 )}
                 <div className="space-y-[15px]">
                     {events.length > 0 ? (
-                        <h1 className="font-bold text-primaryColor text-justify text-[25px]">{eventByID.title}</h1>
+                        <h1 className="font-bold text-primaryColor text-justify text-[25px]">{eventByID?.title}</h1>
                     ) : (
                         <h1 className="font-bold text-primaryColor text-justify text-[25px]">Event title</h1>
                     )}
                     <div className="flex items-center space-x-[6px]">
                         <CalendarDateRangeIcon className="w-[25px] h-[25px]" />
                         {events.length > 0 ? (
-                            <h1 className="text-justify text-[16px]">{changeDateFormat(eventByID.startTime)} - {changeDateFormat(eventByID.endTime)}</h1>
+                            <h1 className="text-justify text-[16px]">{changeDateFormat(eventByID?.startTime)} - {changeDateFormat(eventByID?.endTime)}</h1>
                         ) : (
                             <h1 className="text-justify text-[16px]">Event date</h1>
                         )}
@@ -178,13 +178,13 @@ export default function Buy() {
                     <div className="flex items-center space-x-[6px]">
                         <MapPinIcon className="shrink-0 w-[25px] h-[25px]" />
                         {events.length > 0 ? (
-                            <h1 className="text-justify text-[16px]">{eventByID.location}</h1>
+                            <h1 className="text-justify text-[16px]">{eventByID?.location}</h1>
                         ) : (
                             <h1 className="text-justify text-[16px]">Location</h1>
                         )}
                     </div>
                     {events.length > 0 ? (
-                        <h1 className="text-justify text-[16px]">{eventByID.description}</h1>
+                        <h1 className="text-justify text-[16px]">{eventByID?.description}</h1>
                     ) : (
                         <h1 className="text-justify text-[16px]">Event description</h1>
                     )}
@@ -205,7 +205,7 @@ export default function Buy() {
             <div className="space-y-[60px]">
                 <h1 className="font-bold text-center text-[25px]">You might be interested in</h1>
                 {(() => {
-                    const filteredEvents = events.filter((event: any) => event.id !== eventByID.id)
+                    const filteredEvents = events.filter((event: any) => event.id !== eventByID?.id)
 
                     return Array.from({ length: 2 }).map((_, rowIndex) => {
                         const rowEvents = filteredEvents.slice(rowIndex * 4, rowIndex * 4 + 4)
