@@ -24,12 +24,12 @@ const nextConfig: NextConfig = {
         pathname: "/**",
       },
         {
-        protocol: "http",
-        hostname: "localhost",
-        port: "9001",
+        protocol: "https",
+        hostname: "storage.googleapis.com",
+        pathname: "/**",
       },
     ],
   },
-};//add localhost protocal ***http***
+};//add localhost protocal *http***
 
 export default nextConfig;

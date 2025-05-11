@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { AnimatePresence, motion } from "framer-motion";
 
 interface Event {
@@ -93,7 +93,6 @@ export default function EventsTable() {
         <h2 className="text-xl font-semibold">Events</h2>
         <p className="text-sm text-muted-foreground">{events.length} events</p>
       </div>
-      <Toaster position="top-right" />
 
       <Table>
         <TableHeader>

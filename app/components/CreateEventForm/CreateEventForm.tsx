@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import PosterUpload from "./PosterUpload";
 import EventDetailsForm from "./EventDetailsForm";
 import { Button } from "@/components/ui/button";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 interface Category {
   id: number;
@@ -63,10 +63,9 @@ export default function CreateEventForm({
     });
 
     const imageResult = await res.json();
-    console.log("Image Result:", imageResult);
 
     if (!res.ok) throw new Error(imageResult.error || "Upload failed");
-    const realImageUrl = `http://localhost:9000/eventpom-bucket/${imageResult.fileName}`;
+    const realImageUrl = `https://storage.googleapis.com/eventpom-bucket/${imageResult.fileName}`;
 
     const payload = {
       ...eventData,
@@ -97,9 +96,6 @@ export default function CreateEventForm({
   return (
     <form className="flex flex-col gap-14 pt-10 px-4" onSubmit={handleSubmit}>
       <h1 className="text-3xl font-bold text-[#2A2A6D]">Create Event</h1>
-      <Toaster
-        position="top-right"
-        />
      <div className="grid grid-cols-1 lg:grid-cols-3 gap-32 w-full">
  <div className="w-full max-w-sm">
   <PosterUpload picture={picture} setPicture={setPicture} />
