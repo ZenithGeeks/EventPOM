@@ -43,10 +43,10 @@ export default function Buy() {
         }
         const getEvents = async () => {
             try {
-                const res = await fetch('/api/getEvent')
+                const res = await fetch('/api/events')
                 const result = await res.json()
                 setEvents(result.events)
-
+                console.log(result.events)
                 if (!res.ok) {
                     throw new Error(result.error || 'An unknown error occurred')
                 }
