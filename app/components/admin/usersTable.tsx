@@ -29,6 +29,7 @@ import { Pencil, ChevronDown, ChevronUp } from "lucide-react";
 import Image from "next/image";
 import { Fragment, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import toast from "react-hot-toast";
 
 interface User {
   id: string;
@@ -38,6 +39,7 @@ interface User {
   image: string | null;
   phone?: string | null;
   address?: string | null;
+  lastActiveAt?: string | null;
 }
 
 export default function UserTable() {
@@ -47,6 +49,8 @@ export default function UserTable() {
   const [formData, setFormData] = useState<Partial<User>>({});
   const [dialogOpen, setDialogOpen] = useState(false);
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortByRole, setSortByRole] = useState(false);
 
   const toggleRow = (id: string) => {
     setExpandedRowId((prev) => (prev === id ? null : id));
@@ -102,7 +106,49 @@ export default function UserTable() {
     }
   };
 
-  if (loading) return <div className="p-6 text-center">Loading users...</div>;
+  const handleDelete = async (id: string) => {
+    const confirmed = confirm("Are you sure you want to delete this user?");
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`/api/users/${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        setUsers((prev) => prev.filter((u) => u.id !== id));
+      } else {
+        toast.error("Failed to delete user");
+      }
+    } catch (err) {
+      console.error("Error deleting user:", err);
+    }
+  };
+
+  const filteredUsers = users
+    .filter((user) => {
+      const q = searchQuery.toLowerCase();
+      return (
+        user.name?.toLowerCase().includes(q) ||
+        user.email.toLowerCase().includes(q)
+      );
+    })
+    .sort((a, b) => {
+      if (!sortByRole) return 0;
+      return a.role.localeCompare(b.role);
+    });
+
+  if (loading) {
+    return (
+      <div className="flex justify-center p-10 text-gray-500">
+        <svg className="animate-spin h-5 w-5 mr-3 text-gray-600" viewBox="0 0 24 24" fill="none">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+        Loading users...
+      </div>
+    );
+  }
 
   return (
     <>
@@ -114,9 +160,23 @@ export default function UserTable() {
       >
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">All Users</h2>
-          <span className="text-sm text-muted-foreground">
-            {users?.length} users
-          </span>
+          <div className="flex gap-2 items-center">
+            <Input
+              placeholder="Search by name or email..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-64"
+            />
+            <Button
+              variant="outline"
+              onClick={() => setSortByRole((prev) => !prev)}
+            >
+              Sort by Role {sortByRole ? "↓" : "↑"}
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              {filteredUsers.length} users
+            </span>
+          </div>
         </div>
 
         <Table>
@@ -130,7 +190,7 @@ export default function UserTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users?.map((user) => (
+            {filteredUsers.map((user) => (
               <Fragment key={user.id}>
                 <TableRow>
                   <TableCell>
@@ -166,23 +226,32 @@ export default function UserTable() {
                       variant="outline"
                       className={
                         user.role === "ADMIN"
-                          ? "bg-[#DBFCE6] text-black"
+                          ? "bg-green-100 text-green-800"
                           : user.role === "ORGANIZER"
-                          ? "bg-[#F9F5C5] text-black"
-                          : "bg-white"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : user.role === "ORGANIZER_STAFF"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-gray-100 text-gray-800"
                       }
                     >
                       {user.role}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-sm">{user.email}</TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right flex gap-1 justify-end">
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => handleEdit(user)}
                     >
                       <Pencil className="w-4 h-4 text-muted-foreground" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDelete(user.id)}
+                    >
+                      🗑️
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -204,29 +273,36 @@ export default function UserTable() {
                           transition={{ delay: 0.1 }}
                           className="text-sm text-muted-foreground space-y-2 pt-2"
                         >
-                          {user.phone && (
-                            <div>
-                              <strong>Phone:</strong> {user.phone}
-                            </div>
-                          )}
-                          {user.address && (
-                            <div>
-                              <strong>Address:</strong> {user.address}
-                            </div>
-                          )}
+                          {user.phone && <div><strong>Phone:</strong> {user.phone}</div>}
+                          {user.address && <div><strong>Address:</strong> {user.address}</div>}
                           {user.image && (
                             <div>
                               <strong>Image URL:</strong>{" "}
-                              <a
-                                href={user.image}
-                                target="_blank"
-                                className="text-blue-500 hover:underline"
-                              >
+                              <a href={user.image} target="_blank" className="text-blue-500 hover:underline">
                                 {user.image}
                               </a>
                             </div>
                           )}
-                          {!user.phone && !user.address && !user.image && (
+                          {user.lastActiveAt && (
+                            <div>
+                              <strong>Status:</strong>{" "}
+                              <span
+                                className={`inline-block w-2 h-2 rounded-full mr-1 ${
+                                  new Date(user.lastActiveAt) > new Date(Date.now() - 3 * 60 * 1000)
+                                    ? "bg-green-500"
+                                    : "bg-gray-400"
+                                }`}
+                              ></span>
+                              {new Date(user.lastActiveAt) > new Date(Date.now() - 3 * 60 * 1000)
+                              ? "Online"
+                              : `Last seen at ${new Date(user.lastActiveAt).toLocaleString("en-TH", {
+                                  timeZone: "Asia/Bangkok",
+                                  dateStyle: "short",
+                                  timeStyle: "short",
+                                })}`}
+                            </div>
+                          )}
+                          {!user.phone && !user.address && !user.image && !user.lastActiveAt && (
                             <em>No additional details</em>
                           )}
                         </motion.div>
@@ -240,7 +316,6 @@ export default function UserTable() {
         </Table>
       </motion.div>
 
-      {/* Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -250,17 +325,13 @@ export default function UserTable() {
             <Input
               placeholder="Name"
               value={formData.name || ""}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             />
             <div>
               <label className="text-sm font-medium mb-1 block">Role</label>
               <Select
                 value={formData.role}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, role: value })
-                }
+                onValueChange={(value) => setFormData({ ...formData, role: value })}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select a role" />
@@ -276,23 +347,17 @@ export default function UserTable() {
             <Input
               placeholder="Phone"
               value={formData.phone || ""}
-              onChange={(e) =>
-                setFormData({ ...formData, phone: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
             />
             <Input
               placeholder="Address"
               value={formData.address || ""}
-              onChange={(e) =>
-                setFormData({ ...formData, address: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
             />
             <Input
               placeholder="Image URL"
               value={formData.image || ""}
-              onChange={(e) =>
-                setFormData({ ...formData, image: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, image: e.target.value })}
             />
           </div>
           <DialogFooter className="mt-4">
