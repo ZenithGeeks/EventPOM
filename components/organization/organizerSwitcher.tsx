@@ -10,6 +10,7 @@ import {
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 import { ChevronDown } from "lucide-react";
 import { BuildingOffice2Icon } from "@heroicons/react/24/outline";
+import { useSession } from "next-auth/react";
 interface Org {
   id: string;
   name: string;
@@ -23,21 +24,28 @@ export default function OrganizationSwitcher({
   const [orgs, setOrgs] = useState<Org[]>([]);
   const [selectedOrg, setSelectedOrg] = useState<Org | null>(null);
   const [loading, setLoading] = useState(true);
+  const { data: session } = useSession();
 
   useEffect(() => {
-    fetch("/api/organizations")
-      .then((res) => res.json())
-      .then((data: Org[]) => {
-        setOrgs(data || []);
-        if (data.length > 0) setSelectedOrg(data[0]);
-        setOrganizerId(data[0]?.id || "");
-      })
-      .catch((err) => {
-        console.error("Failed to fetch organizations:", err);
-        setOrgs([]);
-      })
-      .finally(() => setLoading(false));
-  }, [setOrganizerId]);
+  if (!session?.user?.id) return;
+
+  fetch(`/api/users/${session.user.id}/organizers`)
+    .then((res) => res.json())
+    .then((data: Org[]) => {
+      setOrgs(data || []);
+      if (data.length > 0) {
+        setSelectedOrg(data[0]);
+        setOrganizerId(data[0].id);
+      }
+      console.log("Fetched organizations:", data);
+    })
+    .catch((err) => {
+      console.error("Failed to fetch organizations:", err);
+      setOrgs([]);
+    })
+    .finally(() => setLoading(false));
+}, [session?.user?.id, setOrganizerId]);
+
 
   return (
     <div className="w-full ">
