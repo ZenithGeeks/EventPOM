@@ -11,7 +11,7 @@ export default function EventList({ filteredEvents }: EventListProps) {
     return (
         <section className="flex items-center justify-center mt-12">
             <div className="grid grid-cols-2 md:grid-cols-6 gap-4 md:gap-14">
-                {filteredEvents.filter((data) => data.status === "APPROVED").map((data: any) => (
+                {filteredEvents?.filter((data) => data.status === "APPROVED").map((data: any) => (
                     <div key={data.id} className="w-full m-4 bg-white overflow-hidden">
                         {/* Event Image */}
                         <div className="relative w-full aspect-[2/3]">
