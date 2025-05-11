@@ -1,3 +1,4 @@
+
 import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
 import PostgresAdapter from "@auth/pg-adapter"
@@ -32,22 +33,4 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }),
 ],
   secret: process.env.AUTH_SECRET,
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.userId = user.id
-        token.imageUrl = user.imageUrl
-        token.role = user.role
-      }
-      return token
-    },
-    async session({ session, token }) {
-      if (token) {
-        session.user.id = String(token.userId)
-        session.user.imageUrl = token.imageUrl
-        session.user.role = token.role
-      }
-      return session
-    }
-  },
 })
