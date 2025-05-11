@@ -1,52 +1,227 @@
-import React from "react";
+"use client";
+
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Pencil, ChevronDown, ChevronUp } from "lucide-react";
+import Image from "next/image";
+import { Fragment, useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 
-const members = [
-  {
-    name: "Karina",
-    contact: "SMentertainment@gmail.com",
-    role: "Organizer",
-  },
-  {
-    name: "Winter",
-    contact: "winter@example.com",
-    role: "Coordinator",
-  },
-];
+interface User {
+  id: string;
+  name: string | null;
+  email: string;
+  role: string;
+  image: string | null;
+  phone?: string | null;
+  address?: string | null;
+}
 
-const Member: React.FC = () => {
+export default function UserTable() {
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [formData, setFormData] = useState<Partial<User>>({});
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
+
+  const toggleRow = (id: string) => {
+    setExpandedRowId((prev) => (prev === id ? null : id));
+  };
+
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const res = await fetch("/api/users", { cache: "no-store" });
+        const data = await res.json();
+        setUsers(data.users);
+      } catch (err) {
+        console.error("Failed to fetch users", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadUsers();
+  }, []);
+
+  const handleEdit = (user: User) => {
+    setEditingUser(user);
+    setFormData({
+      name: user.name ?? "",
+      role: user.role,
+      phone: user.phone ?? "",
+      address: user.address ?? "",
+      image: user.image ?? "",
+    });
+    setDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!editingUser) return;
+    try {
+      const res = await fetch(`/api/users/${editingUser.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (res.ok) {
+        const updated = await res.json();
+        setUsers((prev) =>
+          prev.map((u) => (u.id === editingUser.id ? updated.user : u))
+        );
+        setDialogOpen(false);
+      } else {
+        console.error("Failed to update user");
+      }
+    } catch (err) {
+      console.error("Error updating user:", err);
+    }
+  };
+
+  if (loading) return <div className="p-6 text-center">Loading users...</div>;
+
   return (
-    <div className="p-6 md:p-8 lg:p-10 bg-white max-w-full sm:max-w-md md:max-w-lg lg:max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold text-gray-900 mb-4">Member</h2>
-      <Table className="w-full">
-        <TableCaption>A list of your team members.</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[100px] px-6">Name</TableHead>
-            <TableHead className="px-6">Contact</TableHead>
-            <TableHead className="text-right px-6">Role</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {members.map((member, index) => (
-            <TableRow key={index}>
-              <TableCell className="px-6 font-medium">{member.name}</TableCell>
-              <TableCell className="px-6">{member.contact}</TableCell>
-              <TableCell className="px-6 text-right">{member.role}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-  );
-};
+    <>
+      <h1 className="text-xl font-semibold">Members</h1>
+      <div className="w-[50rem] mx-auto mt-4 rounded-xl border bg-white p-6 shadow-sm">
+        <div className="flex justify-between items-center mb-4">
+          <span className="text-sm text-muted-foreground">
+            {users?.length} users
+          </span>
+        </div>
 
-export default Member;
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead />
+              <TableHead>Name</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>Email</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {users?.map((user) => (
+              <Fragment key={user.id}>
+                <TableRow>
+                  <TableCell>
+                    <button onClick={() => toggleRow(user.id)}>
+                      {expandedRowId === user.id ? (
+                        <ChevronUp className="w-4 h-4" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4" />
+                      )}
+                    </button>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Image
+                        src={user.image || "/avatars/default.png"}
+                        alt={user.name ?? user.email}
+                        width={36}
+                        height={36}
+                        className="rounded-full object-cover"
+                      />
+                      <div className="flex flex-col">
+                        <span className="font-medium text-sm">
+                          {user.name || "Unnamed User"}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          @{user?.email?.split("@")[0]}
+                        </span>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="capitalize text-sm">
+                    <Badge
+                      variant={user.role === "ADMIN" ? "outline" : "outline"}
+                      className={
+                        user.role === "ADMIN"
+                          ? "bg-[#DBFCE6] text-black"
+                          : user.role === "ORGANIZER"
+                          ? "bg-[#F9F5C5] text-black"
+                          : "bg-white"
+                      }
+                    >
+                      {user.role}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-sm">{user.email}</TableCell>
+                  <TableCell className="text-right">
+                    
+                  </TableCell>
+                </TableRow>
+
+                <AnimatePresence mode="wait">
+                  {expandedRowId === user.id && (
+                    <motion.tr
+                      key={`expanded-${user.id}`}
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <td colSpan={5} className="px-6 pb-4 pt-0">
+                        <div className="text-sm text-muted-foreground space-y-2 pt-2">
+                          {user.phone && (
+                            <div>
+                              <strong>Phone:</strong> {user.phone}
+                            </div>
+                          )}
+                          {user.address && (
+                            <div>
+                              <strong>Address:</strong> {user.address}
+                            </div>
+                          )}
+                          {user.image && (
+                            <div>
+                              <strong>Image URL:</strong>{" "}
+                              <a
+                                href={user.image}
+                                target="_blank"
+                                className="text-blue-500 hover:underline"
+                              >
+                                {user.image}
+                              </a>
+                            </div>
+                          )}
+                          {!user.phone && !user.address && !user.image && (
+                            <em>No additional details</em>
+                          )}
+                        </div>
+                      </td>
+                    </motion.tr>
+                  )}
+                </AnimatePresence>
+              </Fragment>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    
+    </>
+  );
+}
