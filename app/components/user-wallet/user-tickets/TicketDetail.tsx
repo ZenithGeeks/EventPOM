@@ -14,11 +14,7 @@ interface TicketDetailProps {
 
 export default function TicketDetail({ ticket, onBack }: TicketDetailProps) {
   const { Canvas } = useQRCode();
-  
   const { data: session } = useSession();
-  const owner = session?.user;
-
-
   const formatShortDate = (start: string | Date, end: string | Date) => {
     const startDate = new Date(start);
     const endDate = new Date(end);
