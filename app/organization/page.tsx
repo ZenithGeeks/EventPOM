@@ -6,19 +6,42 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import OrganizationDashboard from "../components/organization/dashboard/dashboard";
+import RecipientDetail from "../components/transaction/RecipientDetail";
+import TransactionHistory from "../components/transaction/TransactionHistory";
+import type { Payment } from "@/types/models";
 import EventApplicationWizard from "../components/CreateEventForm/EventApplicationWizard";
+import Member from "../components/organization/member";
 
 export default function OrganizationPage() {
   const { data: session, status } = useSession();
   const [organizerId, setOrganizerId] = useState("");
   const [activeTab, setActiveTab] = useState("Dashboard");
   const router = useRouter();
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [loadingPayments, setLoadingPayments] = useState(false);
   useEffect(() => {
     if (status === "loading") return;
     if (session?.user.role === "USER") {
       router.push("/landing-page");
     }
   }, [session, status, router]);
+
+  // NEW: fetch payments when Transaction tab is selected
+  useEffect(() => {
+    if (activeTab !== "Transaction") return;
+
+    setLoadingPayments(true);
+    fetch("/api/payments", { cache: "no-store" })
+      .then((res) => res.json())
+      .then((json: { success: boolean; data: Payment[] }) => {
+        setPayments(json.data || []);
+      })
+      .catch((err) => {
+        console.error("Failed to load payments:", err);
+        setPayments([]);
+      })
+      .finally(() => setLoadingPayments(false));
+  }, [activeTab]);
 
   if (status === "loading") return <div className="p-10">Loading...</div>;
 
@@ -61,13 +84,19 @@ export default function OrganizationPage() {
         {activeTab === "Transaction" && (
           <div>
             <h1 className="text-2xl font-bold">Transaction</h1>
-            <p className="mt-4">Transaction details go here.</p>
+            <RecipientDetail
+              name="CPE Gogo"
+              bank="Kasikorn Bank"
+              accountNo="123-456-7890"
+              country="Thailand"
+            />
+            <TransactionHistory payments={payments} />
+            
           </div>
         )}
         {activeTab === "Members" && (
           <div>
-            <h1 className="text-2xl font-bold">Members</h1>
-            <p className="mt-4">Member management section.</p>
+            <Member/>
           </div>
         )}
       </main>

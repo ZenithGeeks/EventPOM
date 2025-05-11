@@ -6,7 +6,6 @@ export const PUT = async (
 ) => {
   const { id } = context.params; // ✅ This is now safe
   const body = await req.json();
-    console.log(body);
   try {
     const response = await fetch(`http://localhost:3001/users/${id}`, {
       method: "PUT",
