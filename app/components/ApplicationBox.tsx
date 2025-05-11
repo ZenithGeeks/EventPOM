@@ -34,7 +34,6 @@ const ApplicationBox = () => {
         setLoading(false);
       }
     };
-
     fetchApplications();
   }, []);
 
@@ -63,7 +62,7 @@ const ApplicationBox = () => {
     return createdDate;
   };
 
-  const currentApplication = applications.length > 0 ? applications.filter((application) => {
+  const currentApplication = (applications || []).filter((application) => {
     const currentDate = new Date();
     const startTime = new Date(application.startTime);
     const endTime = new Date(application.endTime);
@@ -71,13 +70,13 @@ const ApplicationBox = () => {
       currentDate < startTime ||
       (currentDate >= startTime && currentDate <= endTime)
     );
-  }) : []
+  }) 
 
-  const pastApplication = applications.length > 0 ? applications.filter((application) => {
+  const pastApplication = (applications || []).filter((application) => {
     const currentDate = new Date();
     const endTime = new Date(application.endTime);
     return currentDate > endTime;
-  }) : []
+  }) 
 
   return (
     <div className="p-4 md:p-6 bg-white">
