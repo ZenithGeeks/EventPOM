@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Ticket, User } from "@/types/models";
+import { Ticket } from "@/types/models";
 import { Button } from "@/components/ui/button";
 import { CalendarDaysIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import { useQRCode } from "next-qrcode";

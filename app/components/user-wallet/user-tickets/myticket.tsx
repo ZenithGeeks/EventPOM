@@ -7,6 +7,7 @@ import Image from "next/image";
 import { Ticket, EventStatus } from "@/types/models";
 import TicketDetail from "./TicketDetail";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 interface RawTicket {
   id: string;
@@ -29,6 +30,7 @@ export default function MyTicket() {
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const { data: session } = useSession();
+  const router = useRouter();
 
   useEffect(() => {
     const userId = session?.user?.id;
@@ -205,7 +207,11 @@ export default function MyTicket() {
                 <p className="text-gray-500">
                   Click here to view events
                 </p>
-                <Button className="mt-4" variant="content">
+                <Button
+                  className="mt-4"
+                  variant="content"
+                  onClick={() => router.push("/landing-page")}
+                >
                   View events
                 </Button>
               </div>
