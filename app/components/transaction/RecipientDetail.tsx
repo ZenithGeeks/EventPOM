@@ -16,18 +16,30 @@ export default function RecipientDetail({
   country,
 }: RecipientDetailProps) {
   return (
-    <div className="border rounded-lg p-6">
-      <h2 className="text-lg font-semibold mb-4">Recipient Detail</h2>
-      <dl className="grid grid-cols-2 gap-x-8 gap-y-4 text-sm text-gray-700">
-        <dt className="font-medium">Recipient Name</dt>
-        <dd>{name}</dd>
-        <dt className="font-medium">Recipient Bank</dt>
-        <dd>{bank}</dd>
-        <dt className="font-medium">Account No.</dt>
-        <dd>{accountNo}</dd>
-        <dt className="font-medium">Recipient Country</dt>
-        <dd>{country}</dd>
-      </dl>
+    <div className="w-full px-4 py-2 sm:px-6 lg:px-8">
+      <div className="bg-white border rounded-lg p-4 sm:p-6 md:p-8">
+        <h2 className="text-lg sm:text-xl font-semibold mb-4 ">
+          Recipient Detail
+        </h2>
+        <dl className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-6 text-sm sm:text-base text-gray-700">
+          <div>
+            <dt className="font-medium text-gray-500">Recipient Name</dt>
+            <dd className="mt-1">{name}</dd>
+          </div>
+          <div>
+            <dt className="font-medium text-gray-500">Recipient Bank</dt>
+            <dd className="mt-1">{bank}</dd>
+          </div>
+          <div>
+            <dt className="font-medium text-gray-500">Account No.</dt>
+            <dd className="mt-1">{accountNo}</dd>
+          </div>
+          <div>
+            <dt className="font-medium text-gray-500">Recipient Country</dt>
+            <dd className="mt-1">{country}</dd>
+          </div>
+        </dl>
+      </div>
     </div>
   );
 }
