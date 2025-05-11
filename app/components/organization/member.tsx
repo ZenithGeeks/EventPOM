@@ -40,7 +40,7 @@ interface User {
   address?: string | null;
 }
 
-export default function UserTable() {
+export default function Member() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -106,8 +106,13 @@ export default function UserTable() {
 
   return (
     <>
-      <h1 className="text-xl font-semibold">Members</h1>
-      <div className="w-[50rem] mx-auto mt-4 rounded-xl border bg-white p-6 shadow-sm">
+      <h1 className="text-2xl font-semibold mb-4">Member</h1>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="w-[50rem] mx-auto rounded-xl border bg-white p-6 shadow-sm"
+      >
         <div className="flex justify-between items-center mb-4">
           <span className="text-sm text-muted-foreground">
             {users?.length} users
@@ -121,6 +126,7 @@ export default function UserTable() {
               <TableHead>Name</TableHead>
               <TableHead>Role</TableHead>
               <TableHead>Email</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -157,7 +163,7 @@ export default function UserTable() {
                   </TableCell>
                   <TableCell className="capitalize text-sm">
                     <Badge
-                      variant={user.role === "ADMIN" ? "outline" : "outline"}
+                      variant="outline"
                       className={
                         user.role === "ADMIN"
                           ? "bg-[#DBFCE6] text-black"
@@ -171,7 +177,13 @@ export default function UserTable() {
                   </TableCell>
                   <TableCell className="text-sm">{user.email}</TableCell>
                   <TableCell className="text-right">
-                    
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEdit(user)}
+                    >
+                      <Pencil className="w-4 h-4 text-muted-foreground" />
+                    </Button>
                   </TableCell>
                 </TableRow>
 
@@ -182,10 +194,16 @@ export default function UserTable() {
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.2 }}
+                      transition={{ duration: 0.25 }}
                     >
                       <td colSpan={5} className="px-6 pb-4 pt-0">
-                        <div className="text-sm text-muted-foreground space-y-2 pt-2">
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ delay: 0.1 }}
+                          className="text-sm text-muted-foreground space-y-2 pt-2"
+                        >
                           {user.phone && (
                             <div>
                               <strong>Phone:</strong> {user.phone}
@@ -211,7 +229,7 @@ export default function UserTable() {
                           {!user.phone && !user.address && !user.image && (
                             <em>No additional details</em>
                           )}
-                        </div>
+                        </motion.div>
                       </td>
                     </motion.tr>
                   )}
@@ -220,8 +238,71 @@ export default function UserTable() {
             ))}
           </TableBody>
         </Table>
-      </div>
-    
+      </motion.div>
+
+      {/* Edit Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit User</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Input
+              placeholder="Name"
+              value={formData.name || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
+            />
+            <div>
+              <label className="text-sm font-medium mb-1 block">Role</label>
+              <Select
+                value={formData.role}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, role: value })
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="USER">USER</SelectItem>
+                  <SelectItem value="ADMIN">ADMIN</SelectItem>
+                  <SelectItem value="ORGANIZER">ORGANIZER</SelectItem>
+                  <SelectItem value="ORGANIZER_STAFF">STAFF</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Input
+              placeholder="Phone"
+              value={formData.phone || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, phone: e.target.value })
+              }
+            />
+            <Input
+              placeholder="Address"
+              value={formData.address || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, address: e.target.value })
+              }
+            />
+            <Input
+              placeholder="Image URL"
+              value={formData.image || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, image: e.target.value })
+              }
+            />
+          </div>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSave}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
