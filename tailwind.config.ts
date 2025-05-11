@@ -51,7 +51,7 @@ export default {
   				'5': 'hsl(var(--chart-5))'
   			},
             'primaryColor': '#2A2A6D',
-            'borderColor': '#D9D9D9'
+            'borderColor': '#D9D9D9',
   			sidebar: {
   				DEFAULT: 'hsl(var(--sidebar-background))',
   				foreground: 'hsl(var(--sidebar-foreground))',
