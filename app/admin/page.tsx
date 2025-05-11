@@ -7,6 +7,7 @@ import AdminSidebar from "@/components/admin-sidebar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import UserTable from "../components/admin/usersTable";
 import EventsTable from "../components/admin/eventsTable";
+import CategoryTab from "../components/admin/categoryTable";
 export default function SettingsPage() {
 const { data: session, status } = useSession();
 const router = useRouter();
@@ -23,7 +24,7 @@ if(session?.user.role === "ADMIN") {
         <div className="hidden md:block fixed top-16 left-0 h-[calc(100vh-4rem)] w-64 z-20">
                 <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab}/>
         </div>
-         <main className="flex-1 w-full  px-4 sm:px-8 md:px-12 py-8">
+         <main className="flex-1 w-full px-4 sm:px-8 md:px-12 py-8">
         <div className="absolute top-4 right-4 flex justify-end mb-4">
           <SidebarTrigger />
         </div>
@@ -46,9 +47,14 @@ if(session?.user.role === "ADMIN") {
           </div>
         )}
         {activeTab === "Members" && (
-          <div>
+          <div className="w-full ">
             <h1 className="text-2xl font-bold">Members</h1>
             <p className="mt-4">Member management section.</p>
+          </div>
+        )}
+          {activeTab === "Categories" && (
+          <div className="w-[100vh] ">
+          <CategoryTab/>
           </div>
         )}
       </main>
