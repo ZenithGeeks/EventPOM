@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { PlusCircleIcon, Trash2Icon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 interface Category {
   id: number;
@@ -67,7 +67,6 @@ export default function CategoryTab() {
         <p className="text-sm text-muted-foreground">Create and manage event categories for organizers.</p>
       </CardHeader>
       <Separator />
-      <Toaster position="top-right"></Toaster>
       <CardContent className="space-y-6 pt-6">
         <div className="flex items-end gap-4">
           <div className="flex flex-col w-full max-w-sm gap-2">
