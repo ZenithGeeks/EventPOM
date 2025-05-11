@@ -196,7 +196,7 @@ const pastTickets = tickets.filter(
 
         <div className="p-6 text-center">
           {activeTab === "active" ? (
-            activeTickets.length > 0 ? (
+            activeTickets?.length > 0 ? (
               renderTickets(activeTickets)
             ) : (
               <div>

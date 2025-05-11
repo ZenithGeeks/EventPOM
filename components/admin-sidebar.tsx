@@ -21,6 +21,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import UserDropdown from "./organization/userDropdown";
+import { DocumentArrowDownIcon } from "@heroicons/react/24/solid";
 
 const items = [
   {
@@ -36,6 +37,11 @@ const items = [
   {
     title: "Event Applications",
     icon: UserGroupIcon,
+    subItems: [],
+  },
+  {
+    title: "Categories",
+    icon: DocumentArrowDownIcon,
     subItems: [],
   },
 ];

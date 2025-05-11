@@ -50,7 +50,7 @@ export default function MapTilerAutocomplete({ setLocation }: MapTilerAutocomple
         type="text"
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        placeholder="ค้นหาสถานที่..."
+        placeholder="Search for place..."
         className="w-full px-3 py-2 border rounded-md text-sm"
       />
       {suggestions.length > 0 && (
