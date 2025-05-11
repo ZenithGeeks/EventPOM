@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import OrganizationDashboard from "../components/organization/dashboard/dashboard";
 import EventApplicationWizard from "../components/CreateEventForm/EventApplicationWizard";
+import AllEvents from "../components/organization/allEvents";
 
 export default function OrganizationPage() {
   const { data: session, status } = useSession();
@@ -43,8 +44,7 @@ export default function OrganizationPage() {
         )}
         {activeTab === "All Events" && (
           <div>
-            <h1 className="text-2xl font-bold">All Events</h1>
-            <p className="mt-4">Here are all your events.</p>
+            <AllEvents/>
           </div>
         )}
         {activeTab === "Event Details" && (
