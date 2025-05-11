@@ -31,6 +31,7 @@ export default function Page() {
     };
 
     fetchData();
+
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
