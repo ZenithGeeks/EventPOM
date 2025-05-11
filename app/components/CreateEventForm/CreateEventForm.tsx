@@ -63,10 +63,9 @@ export default function CreateEventForm({
     });
 
     const imageResult = await res.json();
-    console.log("Image Result:", imageResult);
 
     if (!res.ok) throw new Error(imageResult.error || "Upload failed");
-    const realImageUrl = `http://localhost:9000/eventpom-bucket/${imageResult.fileName}`;
+    const realImageUrl = `https://storage.googleapis.com/eventpom-bucket/${imageResult.fileName}`;
 
     const payload = {
       ...eventData,
