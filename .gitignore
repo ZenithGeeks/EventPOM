@@ -3,5 +3,6 @@
 /.next
 .env
 .vscode
+cloud-sql-proxy
 cloud-sql-proxy.exe
 service-account.json
