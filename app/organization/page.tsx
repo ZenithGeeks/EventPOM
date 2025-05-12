@@ -11,6 +11,7 @@ import TransactionHistory from "../components/transaction/TransactionHistory";
 import type { Payment } from "@/types/models";
 import EventApplicationWizard from "../components/CreateEventForm/EventApplicationWizard";
 import Member from "../components/organization/member";
+import QRScanner from "../components/organization/qrcode-reader/html-qrcode";
 
 export default function OrganizationPage() {
   const { data: session, status } = useSession();
@@ -74,6 +75,11 @@ export default function OrganizationPage() {
           <div>
             <h1 className="text-2xl font-bold">Event Details</h1>
             <p className="mt-4">Here are all your events.</p>
+          </div>
+        )}
+        {activeTab === "QRcode" && (
+          <div>
+            <QRScanner />
           </div>
         )}
         {activeTab === "Create New Event" && (
