@@ -14,7 +14,6 @@ export default function EventApplicationWizard({ organizerId }: { organizerId: s
 
   const handleNext = () => setCurrentStep((prev) => prev + 1);
   const handleBack = () => setCurrentStep((prev) => prev - 1);
-  console.log("eventId", eventId);
   return (
     <div className="px-6 py-10">
       <Steps currentStep={currentStep} steps={steps} />

@@ -6,6 +6,8 @@ American Express: [3782 822463 10005]
 Diners Club: {3602 104200 0004}
 Discover: {6011 1111 1111 1117}
 UnionPay: [6250 9470 0000 0006]
+Transaction -> Payment
+Ticket -> Order, Order item, Ticket to user
 */
 'use client'
 
@@ -13,30 +15,65 @@ import Image from "next/image"
 import { CalendarDateRangeIcon, MapPinIcon } from "@heroicons/react/24/outline"
 import Add from "../../components/buyTicketsPage/addToWishlist"
 import TicketListTable from "../../components/buyTicketsPage/tickets-list-table"
-import tickets from '../tickets.json'
 import Cart from "../../components/buyTicketsPage/cart"
 import { useState, useEffect } from "react"
 import Script from "next/script"
 import { toast } from 'react-hot-toast'
 import { useParams } from "next/navigation"
 import Link from "next/link"
+import { useSession } from "next-auth/react"
+
+interface ticketsByID {
+    id: string
+    name: string
+    seat: string
+    price: number
+    quantity: number
+    left: number
+    eventId: string
+}
+
+interface orderData {
+    userId: string
+    eventId: string
+    totalPrice: number
+    ticketCount: { [key: string]: number }
+    ticketPrices: { [key: string]: number }
+}
 
 export default function Buy() {
     const { id } = useParams()
+    const [loading, setLoading] = useState<boolean>(false)
+    const [ticketCount, setTicketCount] = useState<{ [key: string]: number }>({})
+    const [eventByID, setEventByID] = useState<any>([])
+    const [events, setEvents] = useState<any>([])
+    const [org, setOrg] = useState<any>([])
+    const [ticketsByID, setTicketsByID] = useState<ticketsByID[]>([])
+    const [ticketPrices, setTicketPrices] = useState<{ [key: string]: number }>({})
+    const cartItems = ticketsByID.filter((ticket: any) => ticketCount[ticket.id] > 0)
+    const [orderData, setOrderData] = useState<orderData>({
+        userId: '',
+        eventId: '',
+        totalPrice: 0,
+        ticketCount: ticketCount,
+        ticketPrices: ticketPrices
+    })
+    const cartLength = cartItems.length
+    const total = cartItems.reduce((sum: any, item: any) => sum + item.price * ticketCount[item.id], 0)
+    const { data: session } = useSession()
     useEffect(() => {
         const getEventByID = async (id: string) => {
             try {
                 const res = await fetch(`/api/getEventByID?id=${id}`)
                 const result = await res.json()
                 setEventByID(result.event)
-                console.log(result)
+
                 if (!res.ok) {
                     throw new Error(result.error || 'An unknown error occurred')
                 }
 
-                if (result.event.organizerId) {
-                    getOrganizer(result.event.organizerId)
-                }
+                getOrganizer(result.event.organizerId)
+                getTickets(id)
             } catch (error) {
                 toast.error('Cannot load the event from the database')
             }
@@ -46,7 +83,7 @@ export default function Buy() {
                 const res = await fetch('/api/events')
                 const result = await res.json()
                 setEvents(result.events)
-                console.log(result.events)
+                
                 if (!res.ok) {
                     throw new Error(result.error || 'An unknown error occurred')
                 }
@@ -57,27 +94,39 @@ export default function Buy() {
         getEventByID(id as string)
         getEvents()
     }, [id])
-    const [loading, setLoading] = useState<boolean>(false)
-    const [ticketCount, setTicketCount] = useState<{ [key: string]: number }>(() => tickets.reduce((acc, ticket) => {
-        acc[ticket.id] = 0
-
-        return acc
-    }, {} as { [key: string]: number }))
-    const [eventByID, setEventByID] = useState<any>([])
-    const [events, setEvents] = useState<any>([])
-    const [org, setOrg] = useState<any>([])
-    const cartItems = tickets.filter(ticket => ticketCount[ticket.id] > 0)
-    const cartLength = cartItems.length
-    const total = cartItems.reduce((sum, item) => sum + item.price * ticketCount[item.id], 0)
+    useEffect(() => {
+        if (ticketsByID.length > 0) {
+            const initialCount: { [key: string]: number } = {}
+            const extractPrices: { [key: string]: number } = {}
+            ticketsByID.forEach((ticket: any) => {
+                initialCount[ticket.id] = 0
+                extractPrices[ticket.id] = ticket.price
+            })
+            setTicketCount(initialCount)
+            setTicketPrices(extractPrices)
+        }
+    }, [ticketsByID])
+    useEffect(() => {
+        if (session?.user.id) {
+            setOrderData ({
+                userId: session?.user.id,
+                eventId: String(id),
+                totalPrice: total,
+                ticketCount: ticketCount,
+                ticketPrices: ticketPrices
+            })
+        }
+    }, [session?.user.id, id, total, ticketCount, ticketPrices])
     const resetTicketCount = () => {
         setTicketCount(
-            tickets.reduce((acc, ticket) => {
+            ticketsByID.reduce((acc: any, ticket: any) => {
                 acc[ticket.id] = 0
 
                 return acc
             }, {} as { [key: string]: number })
         )
     }
+    const minPrice = ticketsByID.length > 0 ? Math.min(...ticketsByID.map((ticket: any) => ticket.price)) : 0
     const handleOmisePayment = async () => {
         window.OmiseCard.configure({
             publicKey: 'pkey_test_63061jt2j1wqegs9yvc',
@@ -101,6 +150,7 @@ export default function Buy() {
 
                 if (result.success) {
                     resetTicketCount()
+                    order(orderData)
                     toast.success('Payment successful', { id: toastID })
                 } else {
                     toast.error('Payment failed', { id: toastID })
@@ -121,6 +171,7 @@ export default function Buy() {
     }
     const changeDateFormat = (isoString: string) => {
         const date = new Date(isoString)
+        date.setHours(date.getHours() + 7)
         const day = date.getUTCDate()
         const month = date.toLocaleString('en-GB', { month: 'long', timeZone: 'UTC' })
         const year = date.getUTCFullYear()
@@ -140,6 +191,36 @@ export default function Buy() {
             }
         } catch (error) {
             toast.error('Cannot load organizer information from the database')
+        }
+    }
+    const getTickets = async (id: string) => {
+        try {
+            const res = await fetch(`/api/getTicketsByID?id=${id}`)
+            const result = await res.json()
+            setTicketsByID(result.ticketsByID)
+
+            if (!res.ok) {
+                throw new Error(result.error || 'An unknown error occurred')
+            }
+        } catch (error) {
+            toast.error('Cannot load ticket information from the database')
+        }
+    }
+    const order = async (orderData: orderData) => {
+        try {
+            const res = await fetch(`/api/order`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    orderData
+                })
+            })
+            const result = await res.json()
+
+            if (!res.ok) {
+                throw new Error(result.error || 'An unknown error occurred')
+            }
+        } catch (error) {
+            toast.error('Cannot place order')
         }
     }
 
@@ -165,7 +246,7 @@ export default function Buy() {
                     <div className="flex items-center space-x-[6px]">
                         <CalendarDateRangeIcon className="w-[25px] h-[25px]" />
                         {events.length > 0 ? (
-                            <h1 className="text-justify text-[16px]">{changeDateFormat(eventByID?.startTime)} - {changeDateFormat(eventByID?.endTime)}</h1>
+                            <h1 className="text-justify text-[16px]">{changeDateFormat(eventByID.startTime)} - {changeDateFormat(eventByID.endTime)}</h1>
                         ) : (
                             <h1 className="text-justify text-[16px]">Event date</h1>
                         )}
@@ -188,13 +269,13 @@ export default function Buy() {
                     ) : (
                         <h1 className="text-justify text-[16px]">Event description</h1>
                     )}
-                    <h1 className="font-bold text-justify text-[18px]">Start 1,700 Baht.-</h1>
+                    <h1 className="font-bold text-justify text-[18px]">Start {minPrice} Baht.-</h1>
                     <Add />
                 </div>
             </div>
             <div className="flex mb-[100px] space-x-[60px]">
                 <TicketListTable
-                    Tickets={tickets}
+                    Tickets={ticketsByID}
                     ticketCount={ticketCount}
                     setTicketCount={setTicketCount}
                 />

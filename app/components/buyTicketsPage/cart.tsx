@@ -1,18 +1,19 @@
 import { ShoppingCartIcon } from "@heroicons/react/24/outline"
 import Purchase from "./purchase"
 
-type items = {
+type ticketsByID = {
     id: string
     name: string
-    description: string
+    seat: string
     price: number
     quantity: number
-    status: string
+    left: number
+    eventId: string
 }
 
 type props = {
     length: number
-    items: items[]
+    items: ticketsByID[]
     ticketCount: { [key: string]: number }
     total: number
     loading: boolean

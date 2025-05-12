@@ -2,15 +2,16 @@
 import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import React, { useState } from "react"
+import React from "react"
 
 interface Ticket {
     id: string
     name: string
-    description: string
+    seat: string
     price: number
     quantity: number
-    status: string
+    eventId: string
+    left: number
 }
 
 interface TicketListProps {
@@ -41,7 +42,7 @@ export default function TicketList({ Tickets, ticketCount, setTicketCount }: Tic
                                 <div className="flex flex-col">
                                     <p className="font-bold text-justify text-lg">{ticket.name}</p>
                                     <p className="text-justify text-sm text-gray-400 py-2">
-                                        {ticket.description}
+                                        The description of each ticket goes here.
                                     </p>
                                 </div>
 
