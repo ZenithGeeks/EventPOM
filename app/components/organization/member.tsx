@@ -27,12 +27,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Pencil, ChevronDown, ChevronUp } from "lucide-react";
+import { Pencil } from "lucide-react";
 import Image from "next/image";
 import { Fragment, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import toast from "react-hot-toast";
-import { Autocomplete, TextField } from "@mui/material";
 
 interface User {
   id: string;
@@ -59,11 +58,7 @@ export default function Member({ organizerId }: { organizerId: string }) {
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [eligibleUsers, setEligibleUsers] = useState<User[]>([]);
   const [searchSuggestionQuery, setSearchSuggestionQuery] = useState("");
-  const [orgUsers, setorgUsers] = useState<User[]>([]);
   const [member, setMember] = useState<string>("");
-  const toggleRow = (id: string) => {
-    setExpandedRowId((prev) => (prev === id ? null : id));
-  };
 
   useEffect(() => {
     const loadUsers = async () => {
@@ -77,8 +72,6 @@ export default function Member({ organizerId }: { organizerId: string }) {
 
         const orgData = await orgRes.json();
         const allData = await allRes.json();
-
-        console.log(allData);
         setUsers(orgData.users);
         setAllUsers(allData.users);
 
@@ -161,12 +154,26 @@ export default function Member({ organizerId }: { organizerId: string }) {
     })
     .sort((a, b) => {
       if (!sortByRole) return 0;
-      return a.role.localeCompare(b.role);
+
+      const roleOrder: Record<string, number> = {
+        ADMIN: 1,
+        ORGANIZER: 2,
+        ORGANIZER_STAFF: 3,
+        USER: 4,
+      };
+
+      return (roleOrder[a.role] || 99) - (roleOrder[b.role] || 99);
     });
 
   const filteredSuggestions = eligibleUsers?.filter((user) =>
     new RegExp(searchSuggestionQuery, "i").test(user.email)
   );
+
+  const roleOptions = [
+    { label: "Admin", value: "ADMIN" },
+    { label: "Organizer", value: "ORGANIZER" },
+    { label: "Organizer Staff", value: "ORGANIZER_STAFF" },
+  ];
 
   if (loading) {
     return (
@@ -332,7 +339,22 @@ export default function Member({ organizerId }: { organizerId: string }) {
                     </TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
-                      <Badge>{user.role}</Badge>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={
+                            user.role === "ADMIN"
+                              ? "bg-green-100 text-green-800"
+                              : user.role === "ORGANIZER"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : user.role === "ORGANIZER_STAFF"
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-gray-100 text-gray-800"
+                          }
+                        >
+                          {user.role}
+                        </Badge>
+                      </TableCell>
                     </TableCell>
                     <TableCell>
                       <Button
