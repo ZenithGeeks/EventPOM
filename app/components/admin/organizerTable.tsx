@@ -33,7 +33,12 @@ export default function OrganizerTable() {
       try {
         const res = await fetch("/api/organizations", { cache: "no-store" });
         const data = await res.json();
-        setOrganizers(data || []);
+
+        if (!Array.isArray(data)) {
+          throw new Error("Invalid response format");
+        }
+
+        setOrganizers(data);
         console.log("Organizers:", data);
       } catch (err) {
         toast.error("Failed to fetch organizers");
@@ -46,7 +51,10 @@ export default function OrganizerTable() {
     loadOrganizers();
   }, []);
 
-  const updateStatus = async (id: string, status: "APPROVED" | "REJECTED") => {
+  const updateStatus = async (
+    id: string,
+    status: "APPROVED" | "REJECTED"
+  ) => {
     const toastId = toast.loading(
       `${status === "APPROVED" ? "Approving" : "Rejecting"} organizer...`
     );
@@ -60,7 +68,9 @@ export default function OrganizerTable() {
 
       if (res.ok) {
         setOrganizers((prev) =>
-          prev.map((org) => (org.id === id ? { ...org, status } : org))
+          prev.map((org) =>
+            org.id === id ? { ...org, status: status } : org
+          )
         );
         toast.success(`Organizer ${status.toLowerCase()} successfully`, {
           id: toastId,
@@ -104,32 +114,35 @@ export default function OrganizerTable() {
               <TableCell>{org.phone}</TableCell>
               <TableCell>{org.type}</TableCell>
               <TableCell>
-  {/\.(jpe?g|png|gif|bmp|webp)$/i.test(org.ApplicationDocument) ? (
-    <a
-      href={org.ApplicationDocument}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      <img
-        src={org.ApplicationDocument}
-        alt="Document"
-        className="w-16 h-12 object-cover rounded border"
-      />
-    </a>
-  ) : /\.pdf$/i.test(org.ApplicationDocument) ? (
-    <a
-      href={org.ApplicationDocument}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-blue-600 underline text-sm"
-    >
-      📄 View PDF
-    </a>
-  ) : (
-    <span className="text-gray-500 italic text-sm">Unsupported format</span>
-  )}
-</TableCell>
-
+                {/\.(jpe?g|png|gif|bmp|webp)$/i.test(org.ApplicationDocument) ? (
+                  <a
+                    href={org.ApplicationDocument}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Image
+                      src={org.ApplicationDocument}
+                      alt="Document"
+                      width={64}
+                      height={48}
+                      className="rounded border object-cover"
+                    />
+                  </a>
+                ) : /\.pdf$/i.test(org.ApplicationDocument) ? (
+                  <a
+                    href={org.ApplicationDocument}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline text-sm"
+                  >
+                    📄 View PDF
+                  </a>
+                ) : (
+                  <span className="text-gray-500 italic text-sm">
+                    Unsupported format
+                  </span>
+                )}
+              </TableCell>
               <TableCell>
                 <Badge
                   variant="outline"

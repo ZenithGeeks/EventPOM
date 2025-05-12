@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export async function PUT(
-  req: NextRequest,
-  context: { params: { id: string } }
-) {
-  const eventId = context.params.id;
+export async function PUT(req: NextRequest) {
+  const url = req.nextUrl;
+  const eventId = url.pathname.split("/").pop(); // extract [id] from URL
   const body = await req.json();
+
+  if (!eventId) {
+    return NextResponse.json({ error: "Missing event ID" }, { status: 400 });
+  }
 
   try {
     const res = await fetch(`http://localhost:3001/updateEvent/${eventId}`, {

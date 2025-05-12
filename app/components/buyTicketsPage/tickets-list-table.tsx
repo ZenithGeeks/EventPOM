@@ -2,7 +2,7 @@
 import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import React, { useState } from "react"
+import React from "react"
 
 interface Ticket {
     id: string
