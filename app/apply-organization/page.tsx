@@ -8,15 +8,17 @@ import { PhoneInput } from "@/components/ui/phone-input";
 import { CustomUI } from "@/components/ui/dropzone";
 import { FaFilePdf, FaFileImage } from "react-icons/fa";
 import { FaFileAlt } from "react-icons/fa";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
-interface CreateOrganizationAccountProps { }
 
-export default function CreateOrganizationAccount({ }: CreateOrganizationAccountProps) {
+export default function CreateOrganizationAccount() {
   const { data: session, status } = useSession();
   const [organizationType, setOrganizationType] = useState<"Company" | "Individual">("Company");
   const [termsAccepted, setTermsAccepted] = useState<boolean>(false);
   const [organizationName, setOrganizationName] = useState<string>("");
   const [phoneNumber, setPhoneNumber] = useState<string>("");
+  const router = useRouter();
   const [errors, setErrors] = useState<{ organizationName?: string; phoneNumber?: string; general?: string }>({
     organizationName: "",
     phoneNumber: "",
@@ -25,56 +27,114 @@ export default function CreateOrganizationAccount({ }: CreateOrganizationAccount
   const [verificationDocs, setVerificationDocs] = useState<File[]>([]);
 
   const handleCreateAccount = useCallback(async () => {
-    const newErrors = { organizationName: "", phoneNumber: "", general: "" };
+  const newErrors = { organizationName: "", phoneNumber: "", general: "" };
 
-    if (!termsAccepted) {
-      newErrors.general = "Please accept the terms and conditions.";
-      setErrors(newErrors);
-      return;
+  if (!termsAccepted) {
+    newErrors.general = "Please accept the terms and conditions.";
+    setErrors(newErrors);
+    return;
+  }
+
+  if (!organizationName.trim()) {
+    newErrors.organizationName = "*Organization name is required.";
+  }
+
+  if (!phoneNumber.trim()) {
+    newErrors.phoneNumber = "*Phone number is required.";
+  }
+
+  if (verificationDocs.length === 0) {
+    newErrors.general = "At least one verification document is required.";
+  }
+
+  if (Object.values(newErrors).some((v) => v)) {
+    setErrors(newErrors);
+    return;
+  }
+
+  const userId = session?.user?.id;
+  if (!userId) {
+    setErrors({ general: "You must be signed in." });
+    return;
+  }
+
+  try {
+    // Step 1: Upload file to /api/upload
+    const formData = new FormData();
+    formData.append("file", verificationDocs[0]);
+
+    const uploadRes = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const uploadData = await uploadRes.json();
+
+    if (!uploadRes.ok || !uploadData.fileName) {
+      throw new Error(uploadData.error || "File upload failed");
     }
 
-    if (!organizationName.trim()) {
-      newErrors.organizationName = "*Organization name is required.";
-    }
-    if (!phoneNumber.trim()) {
-      newErrors.phoneNumber = "*Phone number is required.";
-    }
-    if (verificationDocs.length === 0) {
-      newErrors.general = "At least one verification document is required.";
-      setErrors(newErrors);
-      return;
-    }
+    const uploadedFileName = uploadData.fileName;
+    const realImageUrl = `https://storage.googleapis.com/eventpom-bucket/${uploadedFileName}`;
+    // Step 2: Fetch user details
+    const userRes = await fetch(`/api/users/${userId}`);
+    const userJson = await userRes.json();
+    const user = userJson.user;
 
-    if (newErrors.organizationName || newErrors.phoneNumber || newErrors.general) {
-      setErrors(newErrors);
-      return;
-    }
+    if (!user) throw new Error("Failed to fetch user data.");
 
-    setErrors({ organizationName: "", phoneNumber: "", general: "" });
-    try {
-      const formData = new FormData();
-      formData.append("organizationType", organizationType);
-      formData.append("organizationName", organizationName);
-      formData.append("phoneNumber", phoneNumber);
-      verificationDocs.forEach((doc, index) => {
-        formData.append(`verificationDoc${index}`, doc);
-      });
-
-      const response = await fetch("/api/create-organization", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to create account.");
+    // Step 3: Create organization with uploaded file
+    const payload = {
+      name: organizationName,
+      phone: phoneNumber,
+      type: organizationType,
+      ApplicationDocument: realImageUrl,
+      status: "PENDING",
+      userId,
+      userData: {
+        name: user.name || null,
+        firstName: user.firstName || null,
+        lastName: user.lastName || null,
+        email: user.email && user.email.includes("@") ? user.email : null,
+        emailVerified: user.emailVerified ?? null,
+        password: user.password || null,
+        phone: user.phone || null,
+        image: user.image || null,
+        dob: user.dob ?? null,
+        address: user.address || null,
+        gender: user.gender || null,
       }
+    };
 
-      alert("Account created successfully!");
-    } catch (error) {
-      console.error("Account creation error:", error);
-      setErrors({ ...newErrors, general: "An error occurred while creating the account." });
+    const res = await fetch("/api/create-organization", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const json = await res.json();
+
+    if (!res.ok || json.error) {
+      toast.error(json.error || "Failed to create organizer.");
+      throw new Error(json.error || "Failed to create organizer.");
     }
-  }, [organizationType, organizationName, phoneNumber, termsAccepted, verificationDocs]);
+
+    toast.success("Organizer account created successfully!");
+    router.push("/landing-page");
+  } catch (error) {
+    console.error("Account creation error:", error);
+    toast.error("Something went wrong.");
+  }
+}, [
+  organizationName,
+  phoneNumber,
+  organizationType,
+  termsAccepted,
+  verificationDocs,
+  session?.user?.id,
+  router,
+]);
+
 
   if (status === "loading") {
     return (
@@ -89,8 +149,7 @@ export default function CreateOrganizationAccount({ }: CreateOrganizationAccount
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-white">
-      {/* Left Section - Welcome with Image */}
+    <div className="flex flex-col md:flex-row min-h-screen bg-white pt-16">
       <div className="relative w-full md:w-1/2 flex items-center justify-center p-8 text-white bg-black">
         <Image
           src="/images/welcomeorganizer.jpg"
@@ -132,7 +191,7 @@ export default function CreateOrganizationAccount({ }: CreateOrganizationAccount
           </div>
 
           <h1 className="text-2xl md:text-3xl font-bold text-indigo-900 leading-tight">
-            Let's Create Your<br />Organization Account!
+            Let&apos;s Create Your<br />Organization Account!
           </h1>
           <p className="text-gray-600 text-sm md:text-base">
             Publish your awesome event and sell tickets to all attendees around the world!
