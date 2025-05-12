@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 
 export type ApplicationInfo = {
-  id:string
+  id: string;
   location: string;
   title: string;
   imageUrl: string;
@@ -17,19 +17,21 @@ export type ApplicationInfo = {
   createdAt: string;
 };
 
-const AllEvents = () => {
+const AllEvents = ({ organizerId }: { organizerId: string }) => {
   const [activeTab, setActiveTab] = useState<"current" | "past">("current");
   const [applications, setApplications] = useState<ApplicationInfo[]>([]);
   const [loading, setLoading] = useState(true);
-  const { data: session } = useSession();
 
-  const userID = session?.user?.id;
   useEffect(() => {
     const fetchApplications = async () => {
       try {
-        const res = await fetch(`/api/eventApplication?userID=${userID}`);
+        const res = await fetch(
+          `/api/eventApplication?organizerId=${organizerId}`
+        );
         const data = await res.json();
+
         setApplications(data.eventApplicationDetails);
+        console.log(applications);
       } catch (err) {
         console.error("Error fetching applications:", err);
       } finally {
@@ -66,22 +68,20 @@ const AllEvents = () => {
   };
 
   const currentApplication = (applications || []).filter((application) => {
-          const currentDate = new Date();
-          const startTime = new Date(application.startTime);
-          const endTime = new Date(application.endTime);
-          return (
-            currentDate < startTime ||
-            (currentDate >= startTime && currentDate <= endTime)
-          );
-        })
-      
+    const currentDate = new Date();
+    const startTime = new Date(application.startTime);
+    const endTime = new Date(application.endTime);
+    return (
+      currentDate < startTime ||
+      (currentDate >= startTime && currentDate <= endTime)
+    );
+  });
 
   const pastApplication = (applications || []).filter((application) => {
-          const currentDate = new Date();
-          const endTime = new Date(application.endTime);
-          return currentDate > endTime;
-        })
-      
+    const currentDate = new Date();
+    const endTime = new Date(application.endTime);
+    return currentDate > endTime;
+  });
 
   return (
     <div className="p-4 md:p-6 bg-white">
@@ -122,7 +122,7 @@ const AllEvents = () => {
                   {currentApplication.map((application, key) => (
                     <Link
                       key={key}
-                      href={`/organization/allEvents/${application.id}`}
+                      href={`/organization/eventDetail?applicationId=${application.id}`}
                       className="flex flex-col md:flex-row items-start gap-10 border rounded-lg p-4 w-full hover:bg-gray-100 transition"
                     >
                       {/* Event image */}
@@ -199,8 +199,8 @@ const AllEvents = () => {
                 {pastApplication.map((application, key) => (
                   <Link
                     key={key}
-                    href={`/organization/allEvents/${application.id}`}
-                    className="flex flex-col md:flex-row items-start gap-10 border rounded-lg p-4 w-full"
+                    href={`/organization/eventDetail?applicationId=${application.id}`}
+                    className="flex flex-col md:flex-row items-start gap-10 border rounded-lg p-4 w-full hover:bg-gray-100 transition"
                   >
                     <Image
                       src={application.imageUrl}
@@ -243,7 +243,8 @@ const AllEvents = () => {
                   You don't have any past events
                 </p>
                 <p className="text-gray-500">
-                  Once the event you applied is no longer upcoming, it will be appear here.
+                  Once the event you applied is no longer upcoming, it will be
+                  appear here.
                 </p>
               </>
             )}
