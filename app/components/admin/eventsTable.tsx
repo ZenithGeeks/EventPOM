@@ -80,7 +80,6 @@ export default function EventsTable() {
         toast.error(`Failed to ${status.toLowerCase()} event`, { id: toastId });
       }
     } catch (err) {
-        console.log(err)
       toast.error("Something went wrong");
     }
   };
