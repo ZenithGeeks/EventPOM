@@ -9,8 +9,8 @@ interface EventListProps {
 
 export default function EventList({ filteredEvents = [] }: EventListProps) {
     return (
-        <section className="flex items-center justify-center mt-12">
-            <div className="grid grid-cols-2 md:grid-cols-6 gap-4 md:gap-14">
+        <section className="flex items-center justify-center mt-12 px-4 sm:px-8 md:px-12 lg:px-16">
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-4 md:gap-14 w-full max-w-screen-xl">
                 {filteredEvents?.filter((data) => data.status === "APPROVED").map((data: any) => (
                     <div key={data.id} className="w-full m-4 bg-white overflow-hidden">
                         {/* Event Image */}
