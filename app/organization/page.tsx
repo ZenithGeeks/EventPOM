@@ -93,7 +93,7 @@ export default function OrganizationPage() {
           <TransactionHistory payments={payments} />
         </div>
       )}
-      {activeTab === "Members" && <Member />}
+      {activeTab === "Members" && <Member organizerId={organizerId} />}
     </>
   )}
 </main>
