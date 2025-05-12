@@ -32,6 +32,7 @@ import Image from "next/image";
 import { Fragment, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import toast from "react-hot-toast";
+import { Autocomplete, TextField } from "@mui/material";
 
 interface User {
   id: string;
@@ -55,17 +56,38 @@ export default function Member({ organizerId }: { organizerId: string }) {
   const [sortByRole, setSortByRole] = useState(false);
   const [newMemberEmail, setNewMemberEmail] = useState("");
   const [dialogAddMemberOpen, setDialogAddmemberOpen] = useState(false);
-
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [eligibleUsers, setEligibleUsers] = useState<User[]>([]);
+  const [searchSuggestionQuery, setSearchSuggestionQuery] = useState("");
+  const [orgUsers, setorgUsers] = useState<User[]>([]);
+  const [member, setMember] = useState<string>("");
   const toggleRow = (id: string) => {
     setExpandedRowId((prev) => (prev === id ? null : id));
   };
 
   useEffect(() => {
     const loadUsers = async () => {
-      try { // use /api/getUsersByOrganizationId?organizerId=bc984441-954e-4ebb-a0a1-4a51db9d9e7d` to test if there is no migration
-        const res = await fetch(`/api/getUsersByOrganizationId?=${organizerId}`, { cache: "no-store" });
-        const data = await res.json();
-        setUsers(data.users);
+      try {
+        const [orgRes, allRes] = await Promise.all([
+          fetch(`/api/getUsersByOrganizationId?organizerId=${organizerId}`, {
+            cache: "no-store",
+          }),
+          fetch("/api/users", { cache: "no-store" }),
+        ]);
+
+        const orgData = await orgRes.json();
+        const allData = await allRes.json();
+
+        console.log(allData);
+        setUsers(orgData.users);
+        setAllUsers(allData.users);
+
+        // Filter: users not in org
+        const orgEmails = new Set(orgData.users.map((u: User) => u.email));
+        const notInOrg = allData.users.filter(
+          (u: User) => !orgEmails.has(u.email)
+        );
+        setEligibleUsers(notInOrg);
       } catch (err) {
         console.error("Failed to fetch users", err);
       } finally {
@@ -134,13 +156,17 @@ export default function Member({ organizerId }: { organizerId: string }) {
       const q = searchQuery.toLowerCase();
       return (
         user.name?.toLowerCase().includes(q) ||
-        user.email.toLowerCase().includes(q)
+        user.email?.toLowerCase().includes(q)
       );
     })
     .sort((a, b) => {
       if (!sortByRole) return 0;
       return a.role.localeCompare(b.role);
     });
+
+  const filteredSuggestions = eligibleUsers?.filter((user) =>
+    new RegExp(searchSuggestionQuery, "i").test(user.email)
+  );
 
   if (loading) {
     return (
@@ -168,14 +194,15 @@ export default function Member({ organizerId }: { organizerId: string }) {
       </div>
     );
   }
-  const handleAddMember = async () => {
-    if (!newMemberEmail.trim()) return;
+
+  const handleAddMember = async (member: string) => {
+    setDialogAddmemberOpen(false);
 
     try {
       const res = await fetch("/api/postUserByOrganizationId", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: newMemberEmail }),
+        body: JSON.stringify({ organizerId: organizerId, userID: member }),
       });
 
       if (res.ok) {
@@ -213,15 +240,23 @@ export default function Member({ organizerId }: { organizerId: string }) {
             <DialogHeader>
               <DialogTitle>Add Member</DialogTitle>
               <DialogDescription>
-                Enter the email of the new member.
+                Select a user to add to your organization.
               </DialogDescription>
             </DialogHeader>
 
-            <Input
-              placeholder="Enter email"
-              value={newMemberEmail}
-              onChange={(e) => setNewMemberEmail(e.target.value)}
-            />
+            {/* Dropdown list of available users */}
+            <Select value={member} onValueChange={(value) => setMember(value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a user" />
+              </SelectTrigger>
+              <SelectContent>
+                {filteredSuggestions?.map((user) => (
+                  <SelectItem key={user.id} value={user.id}>
+                    {user.name ? `${user.name} — ${user.email}` : user.email}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
             <DialogFooter className="mt-4">
               <Button
@@ -230,7 +265,7 @@ export default function Member({ organizerId }: { organizerId: string }) {
               >
                 Cancel
               </Button>
-              <Button onClick={handleAddMember}>Save</Button>
+              <Button onClick={() => handleAddMember(member)}>Save</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -242,178 +277,90 @@ export default function Member({ organizerId }: { organizerId: string }) {
         className="w-[55rem] mx-auto rounded-xl border bg-white p-6 shadow-sm"
       >
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">All Members</h2>
-          <div className="flex gap-2 items-center">
+          <h2 className="text-lg font-medium">Manage Your Members</h2>
+        </div>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex space-x-4">
             <Input
-              placeholder="Search by name or email..."
+              type="text"
+              placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-64"
+              className="h-10 w-[250px] border border-gray-300 rounded-md px-4"
             />
-            <Button
-              variant="outline"
-              onClick={() => setSortByRole((prev) => !prev)}
+            <Select
+              value={sortByRole ? "role" : ""}
+              onValueChange={(value) =>
+                setSortByRole(value === "role" ? true : false)
+              }
             >
-              Sort by Role {sortByRole ? "↓" : "↑"}
-            </Button>
-            <span className="text-sm text-muted-foreground">
-              {filteredUsers?.length ? `${filteredUsers.length} members` : "0 member"}
-            </span>
+              <SelectTrigger>
+                <SelectValue placeholder="Sort by role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="role">Role</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead />
               <TableHead>Name</TableHead>
-              <TableHead>Role</TableHead>
               <TableHead>Email</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredUsers?.map((user) => (
-              <Fragment key={user.id}>
-                <TableRow>
-                  <TableCell>
-                    <button onClick={() => toggleRow(user.id)}>
-                      {expandedRowId === user.id ? (
-                        <ChevronUp className="w-4 h-4" />
-                      ) : (
-                        <ChevronDown className="w-4 h-4" />
-                      )}
-                    </button>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Image
-                        src={user.image || "/avatars/default.png"}
-                        alt={user.name ?? user.email}
-                        width={36}
-                        height={36}
-                        className="rounded-full object-cover"
-                      />
-                      <div className="flex flex-col">
-                        <span className="font-medium text-sm">
-                          {user.name || "Unnamed User"}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          @{user?.email?.split("@")[0]}
-                        </span>
+            <AnimatePresence>
+              {filteredUsers?.map((user) => (
+                <Fragment key={user.id}>
+                  <TableRow>
+                    <TableCell className="space-x-2">
+                      <div className="flex items-center space-x-2">
+                        <Image
+                          src={user.image ?? "/default-avatar.png"}
+                          alt={user.name ?? ""}
+                          width={32}
+                          height={32}
+                          className="rounded-full"
+                        />
+                        <span>{user.name}</span>
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="capitalize text-sm">
-                    <Badge
-                      variant="outline"
-                      className={
-                        user.role === "ADMIN"
-                          ? "bg-green-100 text-green-800"
-                          : user.role === "ORGANIZER"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : user.role === "ORGANIZER_STAFF"
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-gray-100 text-gray-800"
-                      }
-                    >
-                      {user.role}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-sm">{user.email}</TableCell>
-                  <TableCell className="text-right flex gap-1 justify-end">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleEdit(user)}
-                    >
-                      <Pencil className="w-4 h-4 text-muted-foreground" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(user.id)}
-                    >
-                      🗑️
-                    </Button>
-                  </TableCell>
-                </TableRow>
+                    </TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
+                      <Badge>{user.role}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleEdit(user)}
+                      >
+                        <Pencil className="mr-2" />
+                        Edit
+                      </Button>
+                    </TableCell>
+                  </TableRow>
 
-                <AnimatePresence mode="wait">
                   {expandedRowId === user.id && (
                     <motion.tr
-                      key={`expanded-${user.id}`}
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.25 }}
+                      transition={{ duration: 0.4 }}
                     >
-                      <td colSpan={5} className="px-6 pb-4 pt-0">
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ delay: 0.1 }}
-                          className="text-sm text-muted-foreground space-y-2 pt-2"
-                        >
-                          {user.phone && (
-                            <div>
-                              <strong>Phone:</strong> {user.phone}
-                            </div>
-                          )}
-                          {user.address && (
-                            <div>
-                              <strong>Address:</strong> {user.address}
-                            </div>
-                          )}
-                          {user.image && (
-                            <div>
-                              <strong>Image URL:</strong>{" "}
-                              <a
-                                href={user.image}
-                                target="_blank"
-                                className="text-blue-500 hover:underline"
-                              >
-                                {user.image}
-                              </a>
-                            </div>
-                          )}
-                          {user.lastActiveAt && (
-                            <div>
-                              <strong>Status:</strong>{" "}
-                              <span
-                                className={`inline-block w-2 h-2 rounded-full mr-1 ${
-                                  new Date(user.lastActiveAt) >
-                                  new Date(Date.now() - 3 * 60 * 1000)
-                                    ? "bg-green-500"
-                                    : "bg-gray-400"
-                                }`}
-                              ></span>
-                              {new Date(user.lastActiveAt) >
-                              new Date(Date.now() - 3 * 60 * 1000)
-                                ? "Online"
-                                : `Last seen at ${new Date(
-                                    user.lastActiveAt
-                                  ).toLocaleString("en-TH", {
-                                    timeZone: "Asia/Bangkok",
-                                    dateStyle: "short",
-                                    timeStyle: "short",
-                                  })}`}
-                            </div>
-                          )}
-                          {!user.phone &&
-                            !user.address &&
-                            !user.image &&
-                            !user.lastActiveAt && (
-                              <em>No additional details</em>
-                            )}
-                        </motion.div>
-                      </td>
+                      <TableCell colSpan={4}>
+                        {/* More user details here */}
+                      </TableCell>
                     </motion.tr>
                   )}
-                </AnimatePresence>
-              </Fragment>
-            ))}
+                </Fragment>
+              ))}
+            </AnimatePresence>
           </TableBody>
         </Table>
       </motion.div>

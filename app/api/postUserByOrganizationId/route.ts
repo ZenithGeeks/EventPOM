@@ -1,21 +1,16 @@
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { email } = body;
-
-    if (!email) {
-      return new Response(JSON.stringify({ error: "Email is required" }), {
-        status: 400,
+    const userId = body.userID;
+    const organizerId = body.organizerId;
+    const response = await fetch(
+      `http://localhost:3001/organizer/${organizerId}/users`,
+      {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-      });
-    }
-
-    // Example POST to your backend server
-    const response = await fetch("http://localhost:3001/organizers", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
+        body: JSON.stringify({ userId: userId }),
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`Failed to post: ${response.status}`);
