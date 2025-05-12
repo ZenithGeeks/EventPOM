@@ -32,7 +32,7 @@ const items = [
   {
     title: "All Events",
     icon: CalendarIcon,
-    subItems: ["Event Details","Create New Event"],
+    subItems: ["Event Details","Create New Event","QRcode"],
   },
   {
     title: "Transaction",

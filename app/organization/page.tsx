@@ -11,6 +11,7 @@ import TransactionHistory from "../components/transaction/TransactionHistory";
 import type { Payment } from "@/types/models";
 import EventApplicationWizard from "../components/CreateEventForm/EventApplicationWizard";
 import Member from "../components/organization/member";
+import QRCodeScanner from "../components/organization/qrcode-reader/QRcodeReader";
 
 export default function OrganizationPage() {
   const { data: session, status } = useSession();
@@ -22,11 +23,11 @@ export default function OrganizationPage() {
   useEffect(() => {
     if (status === "loading") return;
     if (session?.user.role === "USER") {
-      router.push("/landing-page");
+      router.push("/not-found");
     }
   }, [session, status, router]);
 
-  // NEW: fetch payments when Transaction tab is selected
+  
   useEffect(() => {
     if (activeTab !== "Transaction") return;
 
@@ -44,7 +45,7 @@ export default function OrganizationPage() {
   }, [activeTab]);
 
   if (status === "loading") return <div className="p-10">Loading...</div>;
-
+  if(session?.user.role !== "USER") {
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-white">
       {/* Sidebar - hidden on small screens */}
@@ -76,6 +77,11 @@ export default function OrganizationPage() {
             <p className="mt-4">Here are all your events.</p>
           </div>
         )}
+        {activeTab === "QRcode" && (
+          <div>
+            <QRCodeScanner/>
+          </div>
+        )}
         {activeTab === "Create New Event" && (
           <div>
             <EventApplicationWizard organizerId={organizerId} />
@@ -102,4 +108,5 @@ export default function OrganizationPage() {
       </main>
     </div>
   );
+}
 }

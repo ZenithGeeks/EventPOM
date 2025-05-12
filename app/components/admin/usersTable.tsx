@@ -130,7 +130,7 @@ export default function UserTable() {
       const q = searchQuery.toLowerCase();
       return (
         user.name?.toLowerCase().includes(q) ||
-        user.email.toLowerCase().includes(q)
+        user.email?.toLowerCase().includes(q)
       );
     })
     .sort((a, b) => {
@@ -237,7 +237,7 @@ export default function UserTable() {
                       {user.role}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-sm">{user.email}</TableCell>
+                  <TableCell className="text-sm">{user?.email}</TableCell>
                   <TableCell className="text-right flex gap-1 justify-end">
                     <Button
                       variant="ghost"
