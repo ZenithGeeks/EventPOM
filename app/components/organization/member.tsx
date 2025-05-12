@@ -28,7 +28,6 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
-import { Pencil } from "lucide-react";
 import Image from "next/image";
 import { Fragment, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -60,7 +59,6 @@ export default function Member({ organizerId }: MemberProps) {
   const [sortByRole, setSortByRole] = useState(false);
   const [member, setMember] = useState<string>("");
   const [loading, setLoading] = useState(true);
-
 
   useEffect(() => {
     const loadUsers = async () => {
