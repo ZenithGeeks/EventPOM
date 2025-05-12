@@ -84,27 +84,32 @@ export default function UserTable() {
   };
 
   const handleSave = async () => {
-    if (!editingUser) return;
-    try {
-      const res = await fetch(`/api/users/${editingUser.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+  if (!editingUser) return;
+  try {
+    const res = await fetch(`/api/users/${editingUser.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...formData,
+        email: editingUser.email, // ✅ Ensure email is not lost
+      }),
+    });
 
-      if (res.ok) {
-        const updated = await res.json();
-        setUsers((prev) =>
-          prev.map((u) => (u.id === editingUser.id ? updated.user : u))
-        );
-        setDialogOpen(false);
-      } else {
-        console.error("Failed to update user");
-      }
-    } catch (err) {
-      console.error("Error updating user:", err);
+    if (res.ok) {
+      const updated = await res.json();
+      setUsers((prev) =>
+        prev.map((u) => (u.id === editingUser.id ? updated.user : u))
+      );
+      toast.success("User updated successfully");
+      setDialogOpen(false);
+    } else {
+      toast.error("Failed to update user");
     }
-  };
+  } catch (err) {
+    console.error("Error updating user:", err);
+    toast.error("Error updating user");
+  }
+};
 
   const handleDelete = async (id: string) => {
     const confirmed = confirm("Are you sure you want to delete this user?");
@@ -130,7 +135,7 @@ export default function UserTable() {
       const q = searchQuery.toLowerCase();
       return (
         user.name?.toLowerCase().includes(q) ||
-        user.email.toLowerCase().includes(q)
+        user.email?.toLowerCase().includes(q)
       );
     })
     .sort((a, b) => {
@@ -237,7 +242,7 @@ export default function UserTable() {
                       {user.role}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-sm">{user.email}</TableCell>
+                  <TableCell className="text-sm">{user?.email}</TableCell>
                   <TableCell className="text-right flex gap-1 justify-end">
                     <Button
                       variant="ghost"

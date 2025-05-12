@@ -7,7 +7,7 @@ interface EventListProps {
     filteredEvents: any[];
 }
 
-export default function EventList({ filteredEvents }: EventListProps) {
+export default function EventList({ filteredEvents = [] }: EventListProps) {
     return (
         <section className="flex items-center justify-center mt-12">
             <div className="grid grid-cols-2 md:grid-cols-6 gap-4 md:gap-14">

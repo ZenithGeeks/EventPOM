@@ -3,7 +3,15 @@ import Image from "next/image";
 import { ArrowLeftCircleIcon, ArrowRightCircleIcon } from "@heroicons/react/24/solid";
 
 const images = [
-  ""
+  "https://storage.googleapis.com/eventpom-bucket/SRxQL1HRJqdWj9c3EXxz.png",
+  "https://storage.googleapis.com/eventpom-bucket/uFPnEDEHYlHKfzPHURQb.png",
+  "https://storage.googleapis.com/eventpom-bucket/aCM0Urm3Q1Ef3XxrpVsy.png",
+  "https://storage.googleapis.com/eventpom-bucket/O8fd8lmX17zLhJ1x022c.png",
+  "https://storage.googleapis.com/eventpom-bucket/hgt7gpJBXC925DXtsYJZ.png",
+  "https://storage.googleapis.com/eventpom-bucket/rXQHecs3jP88BtMAKeyQ.png",
+  "https://storage.googleapis.com/eventpom-bucket/aipZCw5PTYlJ2Q438xyR.png",
+  "https://storage.googleapis.com/eventpom-bucket/iinNAKLqZXmMHArvg0lj.png",
+  "https://storage.googleapis.com/eventpom-bucket/n0kYYkXrf6ZjWaWFXqgs.png",
 ];
 
 export default function HeroSlider() {
