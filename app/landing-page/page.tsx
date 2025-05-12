@@ -5,57 +5,67 @@ import HeroSlider from "@/app/components/landing-page/HeroSlider";
 import SearchBar from "@/app/components/landing-page/SearchBar";
 import EventList from "@/app/components/landing-page/EventList";
 
+// Define event interface
+interface Event {
+  id: string;
+  title: string;
+  location: string;
+  startTime: string;
+  endTime: string;
+  imageUrl: string;
+  status: "APPROVED" | "PENDING" | "REJECTED";
+}
+
 export default function Page() {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchSubmitted, setSearchSubmitted] = useState(false);
-  const [events, setEvents] = useState<any[]>([]);
-  const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
+  const [data, setData] = useState<Event[]>([]);
 
-  // 1) Fetch events + categories once on mount
+  // Debounce the search term
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
+
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  // Fetch event data on mount
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // ➤ Fetch events
-        const evtRes = await fetch("/api/events", { cache: "no-store" });
-        const evtJson = await evtRes.json();
-        if (!evtRes.ok) throw new Error(evtJson.error || `Events fetch failed`);
-        console.log("Fetched Events:", evtJson.events);
-        setEvents(evtJson.events);
+        const res = await fetch("/api/events");
+        const result: { events: Event[]; error?: string } = await res.json();
 
-        // ➤ Fetch categories
-        const catRes = await fetch("/api/categories", { cache: "no-store" });
-        const catJson = await catRes.json();
-        console.log(catJson)
-        setCategories(catJson);
+        if (!res.ok) {
+          throw new Error(result.error || "An unknown error occurred");
+        }
+
+        setData(result.events);
       } catch (err) {
-        console.error("Data Fetch Error:", err);
+        console.error("Failed to fetch events:", err);
       }
     };
 
     fetchData();
   }, []);
 
-  // 2) Debounce the search term
-  useEffect(() => {
-    const handler = setTimeout(() => setDebouncedSearchTerm(searchTerm), 300);
-    return () => clearTimeout(handler);
-  }, [searchTerm]);
-
-  // 3) Filter events by title / location / date
+  // Regex filter based on search term
   const filteredEvents = debouncedSearchTerm
-    ? events.filter((e) => {
-        const rx = new RegExp(debouncedSearchTerm, "i");
+    ? data.filter((event) => {
+        const regex = new RegExp(debouncedSearchTerm, "i");
         return (
-          rx.test(e.title) ||
-          rx.test(e.location) ||
-          rx.test(new Date(e.startTime).toLocaleDateString())
+          regex.test(event.title) ||
+          regex.test(event.location) ||
+          regex.test(new Date(event.startTime).toLocaleDateString())
         );
       })
-    : events;
+    : data;
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
+  // Handle form submit
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setShowSuggestions(false);
     setSearchSubmitted(true);
@@ -65,7 +75,7 @@ export default function Page() {
     <div className="bg-white min-h-screen overflow-auto">
       <HeroSlider />
 
-      <section className="px-8 py-4">
+      <section className="px-8 py-1">
         <h2 className="text-2xl font-bold text-center text-indigo-900">
           Upcoming Events
         </h2>
@@ -78,11 +88,11 @@ export default function Page() {
         setShowSuggestions={setShowSuggestions}
         searchSubmitted={searchSubmitted}
         setSearchSubmitted={setSearchSubmitted}
-        data={events}
+        data={data}
         handleSearchSubmit={handleSearchSubmit}
       />
 
-      <EventList filteredEvents={filteredEvents} categories={categories} />
+      <EventList filteredEvents={filteredEvents} />
     </div>
   );
 }

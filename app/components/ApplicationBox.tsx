@@ -35,7 +35,7 @@ const ApplicationBox = () => {
       }
     };
     fetchApplications();
-  }, []);
+  }, [userID]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -176,7 +176,7 @@ const ApplicationBox = () => {
               ) : (
                 <>
                   <p className="text-lg font-semibold">
-                    You don't have any applications
+                    You don&apos;t have any applications
                   </p>
                   <p className="text-gray-500">
                     When you apply for any event, you can track your application
@@ -229,7 +229,7 @@ const ApplicationBox = () => {
             ) : (
               <>
                 <p className="text-lg font-semibold">
-                  You don't have any past applications
+                  You don&apos;t have any past applications
                 </p>
                 <p className="text-gray-500">
                   When you apply for any event, you can track your application

@@ -1,6 +1,4 @@
 import Dropzone, { DropzoneState } from "shadcn-dropzone";
-import { FaFilePdf, FaFileImage } from "react-icons/fa";
-import { FaFileAlt } from "react-icons/fa";
 
 interface CustomUIProps {
   onDrop: (acceptedFiles: File[]) => void;
@@ -30,16 +28,5 @@ export const CustomUI = ({ onDrop }: CustomUIProps) => {
         </div>
       )}
     </Dropzone>
-  );
-};
-
-// Optional: Export DefaultUI if needed
-export const DefaultUI = () => {
-  return (
-    <Dropzone
-      onDrop={(acceptedFiles: File[]) => {
-        // Do something with the files
-      }}
-    />
   );
 };

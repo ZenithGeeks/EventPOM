@@ -1,11 +1,10 @@
 import { SidebarProvider } from "@/components/ui/sidebar"
-import type { Viewport } from "next"
 
 export const metadata = {
   title: "Organization",
 }
 
-export const viewport: Viewport = {
+export const viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
