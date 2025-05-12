@@ -22,6 +22,16 @@ export default function SearchBar({
   data,
   handleSearchSubmit,
 }: SearchBarProps) {
+  // Filter events based on the search term for suggestions
+  const filteredSuggestions = data.filter((event: any) => {
+    const regex = new RegExp(searchTerm, "i");
+    return (
+      regex.test(event.title) ||
+      regex.test(event.location) ||
+      regex.test(new Date(event.startTime).toLocaleDateString())
+    );
+  });
+
   return (
     <div className="mt-4 space-y-4 relative flex flex-col items-center">
       <form
@@ -43,9 +53,9 @@ export default function SearchBar({
       </form>
 
       {/* Search Suggestions */}
-      {showSuggestions && searchTerm && (
+      {showSuggestions && searchTerm && filteredSuggestions.length > 0 && (
         <ul className="absolute z-10 bg-white shadow-lg rounded-md top-6 w-full max-w-2xl mx-auto text-center left-1/2 transform -translate-x-1/2">
-          {data?.slice(0, 5).map((event: any) => (
+          {filteredSuggestions.map((event: any) => (
             <li
               key={event.id}
               className="px-4 py-2 cursor-pointer hover:bg-gray-200"

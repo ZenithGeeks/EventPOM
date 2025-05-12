@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import HeroSlider from "@/app/components/landing-page/HeroSlider";
 import SearchBar from "@/app/components/landing-page/SearchBar";
@@ -9,46 +10,52 @@ export default function Page() {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchSubmitted, setSearchSubmitted] = useState(false);
-  const [data, setData] = useState<any>([]);
+  const [events, setEvents] = useState<any[]>([]);
+  const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
 
-  // Debounce search input and fetch events
+  // 1) Fetch events + categories once on mount
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-    }, 300);
-
     const fetchData = async () => {
       try {
-        const res = await fetch("/api/events");
-        const result = await res.json();
-        if (!res.ok) {
-          throw new Error(result.error || "An unknown error occurred");
-        }
-        setData(result.events);
+        // ➤ Fetch events
+        const evtRes = await fetch("/api/events", { cache: "no-store" });
+        const evtJson = await evtRes.json();
+        if (!evtRes.ok) throw new Error(evtJson.error || `Events fetch failed`);
+        console.log("Fetched Events:", evtJson.events);
+        setEvents(evtJson.events);
+
+        // ➤ Fetch categories
+        const catRes = await fetch("/api/categories", { cache: "no-store" });
+        const catJson = await catRes.json();
+        console.log(catJson)
+        setCategories(catJson);
       } catch (err) {
-        console.log(err);
+        console.error("Data Fetch Error:", err);
       }
     };
 
     fetchData();
+  }, []);
 
+  // 2) Debounce the search term
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedSearchTerm(searchTerm), 300);
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  // Regex search
-  const filteredEvents = searchTerm
-    ? data.filter((event: any) => {
-        const regex = new RegExp(debouncedSearchTerm, "i");
+  // 3) Filter events by title / location / date
+  const filteredEvents = debouncedSearchTerm
+    ? events.filter((e) => {
+        const rx = new RegExp(debouncedSearchTerm, "i");
         return (
-          regex.test(event.title) ||
-          regex.test(event.location) ||
-          regex.test(new Date(event.startTime).toLocaleDateString())
+          rx.test(e.title) ||
+          rx.test(e.location) ||
+          rx.test(new Date(e.startTime).toLocaleDateString())
         );
       })
-    : data;
+    : events;
 
-  // Handle search submission
-  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setShowSuggestions(false);
     setSearchSubmitted(true);
@@ -57,11 +64,13 @@ export default function Page() {
   return (
     <div className="bg-white min-h-screen overflow-auto">
       <HeroSlider />
-      <section className="px-8 py-1">
+
+      <section className="px-8 py-4">
         <h2 className="text-2xl font-bold text-center text-indigo-900">
           Upcoming Events
         </h2>
       </section>
+
       <SearchBar
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -69,10 +78,11 @@ export default function Page() {
         setShowSuggestions={setShowSuggestions}
         searchSubmitted={searchSubmitted}
         setSearchSubmitted={setSearchSubmitted}
-        data={data}
+        data={events}
         handleSearchSubmit={handleSearchSubmit}
       />
-      <EventList filteredEvents={filteredEvents} />
+
+      <EventList filteredEvents={filteredEvents} categories={categories} />
     </div>
   );
 }
