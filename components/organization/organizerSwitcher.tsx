@@ -11,9 +11,11 @@ import { SidebarMenuButton } from "@/components/ui/sidebar";
 import { ChevronDown } from "lucide-react";
 import { BuildingOffice2Icon } from "@heroicons/react/24/outline";
 import { useSession } from "next-auth/react";
+import { Badge } from "../ui/badge";
 interface Org {
   id: string;
   name: string;
+  status: string;
 }
 
 export default function OrganizationSwitcher({
@@ -27,25 +29,27 @@ export default function OrganizationSwitcher({
   const { data: session } = useSession();
 
   useEffect(() => {
-  if (!session?.user?.id) return;
-
-  fetch(`/api/users/${session.user.id}/organizers`)
-    .then((res) => res.json())
-    .then((data: Org[]) => {
-      setOrgs(data || []);
-      if (data.length > 0) {
-        setSelectedOrg(data[0]);
-        setOrganizerId(data[0].id);
-      }
-      console.log("Fetched organizations:", data);
-    })
-    .catch((err) => {
-      console.error("Failed to fetch organizations:", err);
-      setOrgs([]);
-    })
-    .finally(() => setLoading(false));
-}, [session?.user?.id, setOrganizerId]);
-
+    if (!session?.user?.id) return;
+    fetch(`/api/users/${session.user.id}/organizers`)
+      .then((res) => res.json())
+      .then((data: Org[]) => {
+        setOrgs(data || []);
+        const approvedOrg = data.find((org) => org.status === "APPROVED");
+        if (approvedOrg) {
+          setSelectedOrg(approvedOrg);
+          setOrganizerId(approvedOrg.id);
+        } else {
+          setSelectedOrg(null);
+          setOrganizerId("");
+        }
+        console.log("Fetched organizations:", data);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch organizations:", err);
+        setOrgs([]);
+      })
+      .finally(() => setLoading(false));
+  }, [session?.user?.id, setOrganizerId]);
 
   return (
     <div className="w-full ">
@@ -72,13 +76,35 @@ export default function OrganizationSwitcher({
           {orgs.length > 0 ? (
             orgs.map((org) => (
               <DropdownMenuItem
-                key={org.id}
-                onClick={() => {
-                  setSelectedOrg(org)
-                  setOrganizerId(org.id)}}
-                className={selectedOrg?.id === org.id ? "bg-muted" : ""}
-              >
-                <div className="font-bold">{org.name}</div>
+                  key={org.id}
+                  disabled={org.status === "PENDING"}
+                  onClick={() => {
+                    if (org.status !== "PENDING") {
+                      setSelectedOrg(org);
+                      setOrganizerId(org.id);
+                    }
+                  }}
+                  className={`${
+                    selectedOrg?.id === org.id ? "bg-muted" : ""
+                  } ${org.status === "PENDING" ? "opacity-50 cursor-not-allowed" : ""}`}
+                >
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-sm text-gray-900">
+                    {org.name}
+                  </span>
+                  <Badge
+                    variant="outline"
+                    className={`text-[10px] py-0.5 px-2 rounded-md ${
+                      org.status === "PENDING"
+                        ? "text-yellow-600 border-yellow-600"
+                        : org.status === "APPROVED"
+                        ? "text-green-600 border-green-600"
+                        : "text-red-600 border-red-600"
+                    }`}
+                  >
+                    {org.status}
+                  </Badge>
+                </div>
               </DropdownMenuItem>
             ))
           ) : (

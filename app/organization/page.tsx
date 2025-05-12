@@ -54,58 +54,50 @@ export default function OrganizationPage() {
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 w-full md:ml-32 px-4 sm:px-8 md:px-12 py-8">
-        {/* Show sidebar trigger button on small screens */}
-        <div className="absolute top-4 right-4  flex justify-end mb-4">
-          <SidebarTrigger />
-        </div>
+<main className="flex-1 w-full md:ml-32 px-4 sm:px-8 md:px-12 py-8">
+  <div className="absolute top-4 right-4 flex justify-end mb-4">
+    <SidebarTrigger />
+  </div>
 
-        {activeTab === "Dashboard" && (
-          <div>
-            <OrganizationDashboard />
-          </div>
-        )}
-        {activeTab === "All Events" && (
-          <div>
-            <h1 className="text-2xl font-bold">All Events</h1>
-            <p className="mt-4">Here are all your events.</p>
-          </div>
-        )}
-        {activeTab === "Event Details" && (
-          <div>
-            <h1 className="text-2xl font-bold">Event Details</h1>
-            <p className="mt-4">Here are all your events.</p>
-          </div>
-        )}
-        {activeTab === "QRcode" && (
-          <div>
-            <QRCodeScanner/>
-          </div>
-        )}
-        {activeTab === "Create New Event" && (
-          <div>
-            <EventApplicationWizard organizerId={organizerId} />
-          </div>
-        )}
-        {activeTab === "Transaction" && (
-          <div>
-            <h1 className="text-2xl font-bold">Transaction</h1>
-            <RecipientDetail
-              name="CPE Gogo"
-              bank="Kasikorn Bank"
-              accountNo="123-456-7890"
-              country="Thailand"
-            />
-            <TransactionHistory payments={payments} />
-            
-          </div>
-        )}
-        {activeTab === "Members" && (
-          <div>
-            <Member />
-          </div>
-        )}
-      </main>
+  {!organizerId ? (
+    <div className="text-center text-gray-600 mt-20">
+      <h2 className="text-xl font-semibold">No Approved Organizer</h2>
+      <p className="text-sm">You need an approved organization before accessing this dashboard.</p>
+    </div>
+  ) : (
+    <>
+      {activeTab === "Dashboard" && <OrganizationDashboard />}
+      {activeTab === "All Events" && (
+        <div>
+          <h1 className="text-2xl font-bold">All Events</h1>
+          <p className="mt-4">Here are all your events.</p>
+        </div>
+      )}
+      {activeTab === "Event Details" && (
+        <div>
+          <h1 className="text-2xl font-bold">Event Details</h1>
+          <p className="mt-4">Here are all your events.</p>
+        </div>
+      )}
+      {activeTab === "QRcode" && <QRCodeScanner />}
+      {activeTab === "Create New Event" && <EventApplicationWizard organizerId={organizerId} />}
+      {activeTab === "Transaction" && (
+        <div>
+          <h1 className="text-2xl font-bold">Transaction</h1>
+          <RecipientDetail
+            name="CPE Gogo"
+            bank="Kasikorn Bank"
+            accountNo="123-456-7890"
+            country="Thailand"
+          />
+          <TransactionHistory payments={payments} />
+        </div>
+      )}
+      {activeTab === "Members" && <Member />}
+    </>
+  )}
+</main>
+
     </div>
   );
 }
