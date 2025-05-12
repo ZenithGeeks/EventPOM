@@ -8,6 +8,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import UserTable from "../components/admin/usersTable";
 import EventsTable from "../components/admin/eventsTable";
 import CategoryTab from "../components/admin/categoryTable";
+import OrganizerTable from "../components/admin/organizerTable";
 export default function SettingsPage() {
 const { data: session, status } = useSession();
 const router = useRouter();
@@ -37,8 +38,7 @@ if(session?.user.role === "ADMIN") {
         )}
         {activeTab === "Organization Applications" && (
           <div>
-            <h1 className="text-2xl font-bold">Event Details</h1>
-            <p className="mt-4">Here are all your events.</p>
+            <OrganizerTable/>
           </div>
         )}
         {activeTab === "Event Applications" && (

@@ -3,15 +3,15 @@ import Image from "next/image";
 import { ArrowLeftCircleIcon, ArrowRightCircleIcon } from "@heroicons/react/24/solid";
 
 const images = [
-  "http://localhost:9000/eventpom-bucket/hero1.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=cvZyrkt2huShNXglI1x4%2F20250422%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250422T094302Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=e11b346b15f4af9c397f9996ba80952bab7b7af706ed531fdeaec9c25c08b9c2",
-  "http://localhost:9000/eventpom-bucket/hero2.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=cvZyrkt2huShNXglI1x4%2F20250422%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250422T095833Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=75e4d1d870cc6fc5d6a9f78006632de210639a4b8a9f838b7cc025ad25c5297e",
-  "http://localhost:9000/eventpom-bucket/hero3.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=cvZyrkt2huShNXglI1x4%2F20250422%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250422T100519Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=272382f70485dbe2e2f275a7b373b32bb7467316d9586a1cee4562e837d82397",
-  "http://localhost:9000/eventpom-bucket/hero4.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=cvZyrkt2huShNXglI1x4%2F20250422%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250422T100333Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=c9ad5cf68596e1e1b3cbe8fe8b21945ebf9ed298e245e3e80fece7167eaab3aa",
-  "http://localhost:9000/eventpom-bucket/hero5.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=cvZyrkt2huShNXglI1x4%2F20250422%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250422T101109Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=65ed78585d37dbbc8b74a1c1ba8a3cad9317a1db5f92432e77dddcdc018fc6eb",
-  "http://localhost:9000/eventpom-bucket/hero6.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=cvZyrkt2huShNXglI1x4%2F20250422%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250422T101330Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=d0cca2464fe13dfac29178d39b910f8648ab8ab016d8afae3352f5300e7da594",
-  "http://localhost:9000/eventpom-bucket/hero7.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=cvZyrkt2huShNXglI1x4%2F20250422%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250422T101604Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=cbad5a5571aeea3afbeff91e5a1f63a974f2b993779e577d4a832c8759cc5acc",
-  "http://localhost:9000/eventpom-bucket/hero8.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=cvZyrkt2huShNXglI1x4%2F20250422%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250422T101703Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=da9bcb032894d5f3892ea6863fd5f80ee30b1551b9f202295538117c6215b4dd",
-  "http://localhost:9000/eventpom-bucket/hero9.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=cvZyrkt2huShNXglI1x4%2F20250422%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250422T101801Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=021075140b19499cebc12cdcf31d6ec34c94d92b12765848fbb2304a3db80b6a",
+  "https://storage.googleapis.com/eventpom-bucket/SRxQL1HRJqdWj9c3EXxz.png",
+  "https://storage.googleapis.com/eventpom-bucket/uFPnEDEHYlHKfzPHURQb.png",
+  "https://storage.googleapis.com/eventpom-bucket/aCM0Urm3Q1Ef3XxrpVsy.png",
+  "https://storage.googleapis.com/eventpom-bucket/O8fd8lmX17zLhJ1x022c.png",
+  "https://storage.googleapis.com/eventpom-bucket/hgt7gpJBXC925DXtsYJZ.png",
+  "https://storage.googleapis.com/eventpom-bucket/rXQHecs3jP88BtMAKeyQ.png",
+  "https://storage.googleapis.com/eventpom-bucket/aipZCw5PTYlJ2Q438xyR.png",
+  "https://storage.googleapis.com/eventpom-bucket/iinNAKLqZXmMHArvg0lj.png",
+  "https://storage.googleapis.com/eventpom-bucket/n0kYYkXrf6ZjWaWFXqgs.png",
 ];
 
 export default function HeroSlider() {
@@ -72,7 +72,7 @@ export default function HeroSlider() {
       {/* Foreground content */}
       <div className="relative w-full sm:w-full md:w-full lg:w-full h-64 sm:h-72 md:h-80 lg:h-96 overflow-hidden z-10">
         <div className="relative w-full h-full">
-          {images.map((src, index) => (
+          {images?.map((src, index) => (
             <div
               key={index}
               className={`absolute inset-0 transition-opacity duration-500 ease-in-out ${

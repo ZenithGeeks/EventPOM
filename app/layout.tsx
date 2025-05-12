@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata } from "next/types";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar";
@@ -26,6 +26,7 @@ export default function RootLayout({
         <SessionProvider>
           <AppProviders>
             <Navbar />
+            
             <Toaster position="top-center"/>
             {children}
           </AppProviders>

@@ -13,12 +13,31 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Navbar() {
   const { data: session } = useSession();
   const pathname = usePathname();
   const hideNavbar = ["/organization","/admin"];
   const userWallet = ["/user-wallet"];
+
+useEffect(() => {
+  const id = session?.user?.id;
+  if (!id) return;
+
+  const pingUser = () => {
+    fetch(`/api/users/${id}/ping`, {
+      method: "POST",
+    }).catch((err) => {
+      console.error("Failed to ping user activity:", err);
+    });
+  };
+
+  pingUser();
+  const interval = setInterval(pingUser, 60000);
+  return () => clearInterval(interval);
+}, [session?.user?.id]);
+
   if (hideNavbar.includes(pathname)) {
     return (
       <div>
@@ -26,6 +45,8 @@ export default function Navbar() {
       </div>
     )
   }
+  
+  
   else if (userWallet.includes(pathname)) {
     return (
       <nav className="bg-white shadow-md border-b border-gray-200 w-full fixed top-0 left-0 z-50">
@@ -118,6 +139,7 @@ export default function Navbar() {
       <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           <div className="flex items-center pt-4 md:pl-[10rem]">
+
             <Link href={"/landing-page"}>
               <Image
                 src="/logo.svg"
@@ -128,6 +150,7 @@ export default function Navbar() {
             </Link>
           </div>
           {session?.user ? (
+            
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <div className="flex items-center justify-center bg-purple-500 hover:bg-purple-700 hover:border-2 hover:border-gray-400 text-white rounded-3xl w-[2.5rem] h-[2.5rem]">
@@ -181,6 +204,7 @@ export default function Navbar() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            
           ) : (
             <Button
               onClick={() => signIn()}
