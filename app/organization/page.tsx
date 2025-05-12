@@ -19,7 +19,6 @@ export default function OrganizationPage() {
   const [activeTab, setActiveTab] = useState("Dashboard");
   const router = useRouter();
   const [payments, setPayments] = useState<Payment[]>([]);
-  const [loadingPayments, setLoadingPayments] = useState(false);
   useEffect(() => {
     if (status === "loading") return;
     if (session?.user.role === "USER") {
@@ -31,7 +30,6 @@ export default function OrganizationPage() {
   useEffect(() => {
     if (activeTab !== "Transaction") return;
 
-    setLoadingPayments(true);
     fetch("/api/payments", { cache: "no-store" })
       .then((res) => res.json())
       .then((json: { success: boolean; data: Payment[] }) => {
@@ -41,7 +39,6 @@ export default function OrganizationPage() {
         console.error("Failed to load payments:", err);
         setPayments([]);
       })
-      .finally(() => setLoadingPayments(false));
   }, [activeTab]);
 
   if (status === "loading") return <div className="p-10">Loading...</div>;

@@ -5,7 +5,6 @@ const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3001"; // Your 
 export async function POST(req: Request) {
   try {
     const body = await req.json(); // Read request body
-    console.log(`${BACKEND_URL}/createEvent`);
     const response = await fetch(`${BACKEND_URL}/createEvent`, {
       method: "POST",
       headers: {

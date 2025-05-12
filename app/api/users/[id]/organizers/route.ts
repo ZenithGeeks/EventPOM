@@ -1,12 +1,16 @@
-export async function GET(
-  req: Request,
-  context: { params: { id: string } }
-) {
-  try {
-    const { id } = context.params; // ✅ This is now safe
+// app/api/user/[id]/organizers/route.ts
+import { NextRequest, NextResponse } from "next/server";
 
+export async function GET(req: NextRequest) {
+  const id = req.nextUrl.pathname.split("/").at(-2); // gets [id] before "/organizers"
+
+  if (!id) {
+    return NextResponse.json({ error: "Missing user ID" }, { status: 400 });
+  }
+
+  try {
     const response = await fetch(`http://localhost:3001/user/${id}/organizers`, {
-      cache: "no-store", // always fresh data
+      cache: "no-store",
     });
 
     if (!response.ok) {
@@ -14,7 +18,7 @@ export async function GET(
     }
 
     const data = await response.json();
-    console.log("Response from backend:", data);
+
     return new Response(JSON.stringify(data.organizers ?? data), {
       status: 200,
       headers: {

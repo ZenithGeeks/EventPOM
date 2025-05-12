@@ -1,49 +1,17 @@
 import { NextRequest } from "next/server";
 
-export const PUT = async (
-  req: NextRequest,
-  context: { params: { id: string } }
-) => {
-  const { id } = context.params; // ✅ This is now safe
+const BACKEND_URL = "http://localhost:3001";
+
+// Helper to extract [id] from URL
+function extractIdFromPath(pathname: string): string | null {
+  const segments = pathname.split("/");
+  return segments[segments.length - 1] || null;
+}
+
+// ----------- PUT -------------
+export async function PUT(req: NextRequest) {
+  const id = extractIdFromPath(req.nextUrl.pathname);
   const body = await req.json();
-  try {
-    const response = await fetch(`http://localhost:3001/users/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Backend error: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    return new Response(JSON.stringify(data), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
-  } catch (error) {
-    return new Response(
-      JSON.stringify({
-        error: error instanceof Error ? error.message : "Unknown error",
-      }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
-  }
-};
-
-
-export async function DELETE(
-  _req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  const id = params.id;
 
   if (!id) {
     return new Response(JSON.stringify({ error: "Missing user ID" }), {
@@ -53,9 +21,42 @@ export async function DELETE(
   }
 
   try {
-    const res = await fetch(`http://localhost:3001/users/${id}`, {
-      method: "DELETE",
+    const response = await fetch(`${BACKEND_URL}/users/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
     });
+
+    if (!response.ok) {
+      throw new Error(`Backend error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return new Response(JSON.stringify(data), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
+  }
+}
+
+// ----------- DELETE -------------
+export async function DELETE(req: NextRequest) {
+  const id = extractIdFromPath(req.nextUrl.pathname);
+
+  if (!id) {
+    return new Response(JSON.stringify({ error: "Missing user ID" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  try {
+    const res = await fetch(`${BACKEND_URL}/users/${id}`, { method: "DELETE" });
 
     if (!res.ok) {
       const msg = await res.text();
@@ -68,25 +69,25 @@ export async function DELETE(
     });
   } catch (err) {
     return new Response(
-      JSON.stringify({ error: err || "Unknown error" }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      }
+      JSON.stringify({ error: err instanceof Error ? err.message : "Unknown error" }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 }
 
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  const { id } = params;
+// ----------- GET -------------
+export async function GET(req: NextRequest) {
+  const id = extractIdFromPath(req.nextUrl.pathname);
+
+  if (!id) {
+    return new Response(JSON.stringify({ error: "Missing user ID" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 
   try {
-    const response = await fetch(`http://localhost:3001/users/${id}`, {
-      method: "GET",
-    });
+    const response = await fetch(`${BACKEND_URL}/users/${id}`);
 
     if (!response.ok) {
       throw new Error(`Backend error: ${response.status}`);
@@ -99,13 +100,8 @@ export async function GET(
     });
   } catch (error) {
     return new Response(
-      JSON.stringify({
-        error: error instanceof Error ? error.message : "Unknown error",
-      }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      }
+      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 }
