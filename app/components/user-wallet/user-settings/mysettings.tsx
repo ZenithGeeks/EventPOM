@@ -23,6 +23,8 @@ const SettingsComponent: React.FC<SettingsComponentProps> = ({ onSave, onDeleteA
           <Image
             src={session?.user?.image || "/default-profile.jpg"}
             alt="Profile"
+            width={96}
+            height={96}
             className="w-32 h-32 rounded-full mb-2"
           />
           <Button variant="link" className="text-blue-500 underline p-0">
