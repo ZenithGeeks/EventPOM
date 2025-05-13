@@ -32,8 +32,10 @@ interface Organizer {
 interface Ticket {
   id: string;
   name: string;
+  description: string;
   price: number;
   quantity: number;
+  status: string;
 }
 
 // ------------------ Component ------------------
