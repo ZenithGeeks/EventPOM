@@ -1,9 +1,7 @@
-export async function POST(
-  _req: Request,
-  { params }: { params: { id: string } }
-) {
-  const wait = await params;
-  const id = wait.id;
+import { NextRequest } from "next/server";
+
+export async function POST(req: NextRequest) {
+  const id = req.nextUrl.pathname.split("/").at(-2); // Extract [id] from `/users/[id]/ping`
 
   if (!id || id === "false") {
     return new Response(JSON.stringify({ error: "Invalid or missing user ID" }), {
@@ -31,7 +29,7 @@ export async function POST(
     });
   } catch (error) {
     return new Response(
-      JSON.stringify({ error: error || "Unknown error" }),
+      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
       {
         status: 500,
         headers: { "Content-Type": "application/json" },

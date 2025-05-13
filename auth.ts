@@ -1,4 +1,6 @@
 import NextAuth from "next-auth"
+import type { JWT } from "next-auth/jwt";
+import type { Session, User } from "next-auth";
 import Google from "next-auth/providers/google"
 import PostgresAdapter from "@auth/pg-adapter"
 import { Pool } from "pg"
@@ -14,7 +16,7 @@ const pool = new Pool({
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
 })
-
+ 
 export const { handlers, signIn, signOut, auth } = NextAuth({
  adapter: PostgresAdapter(pool),
   providers: [
@@ -33,21 +35,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 ],
   secret: process.env.AUTH_SECRET,
   callbacks: {
-    async jwt({ token, user }) {
+     async jwt({ token, user }: { token: JWT; user?: User }) {
       if (user) {
-        token.userId = user.id
-        token.imageUrl = user.imageUrl
-        token.role = user.role
+        token.userId = user.id;
+        token.imageUrl = user.imageUrl;
+        token.role = user.role;
       }
-      return token
+      return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: Session; token: JWT }) {
       if (token) {
-        session.user.id = String(token.userId)
-        session.user.imageUrl = token.imageUrl
-        session.user.role = token.role
+        session.user.id = token.userId!;
+        session.user.imageUrl = token.imageUrl;
+        session.user.role = token.role;
       }
-      return session
-    }
+      return session;
+    },
   },
 })

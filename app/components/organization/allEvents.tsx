@@ -3,11 +3,13 @@ import { Badge } from "@/components/ui/badge";
 import { CalendarDaysIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 export type ApplicationInfo = {
-  location: string
-  title: string
-  imageUrl: string
+  id: string;
+  location: string;
+  title: string;
+  imageUrl: string;
   startTime: string;
   endTime: string;
   name: string;
@@ -15,27 +17,30 @@ export type ApplicationInfo = {
   createdAt: string;
 };
 
-const ApplicationBox = () => {
+const AllEvents = ({ organizerId }: { organizerId: string }) => {
   const [activeTab, setActiveTab] = useState<"current" | "past">("current");
   const [applications, setApplications] = useState<ApplicationInfo[]>([]);
   const [loading, setLoading] = useState(true);
-  const { data: session } = useSession();
-  
-  const userID = (session?.user?.id);
+
   useEffect(() => {
     const fetchApplications = async () => {
       try {
-        const res = await fetch(`/api/eventApplication?userID=${userID}`);
+        const res = await fetch(
+          `/api/eventApplication?organizerId=${organizerId}`
+        );
         const data = await res.json();
+
         setApplications(data.eventApplicationDetails);
+        console.log(applications);
       } catch (err) {
         console.error("Error fetching applications:", err);
       } finally {
         setLoading(false);
       }
     };
+
     fetchApplications();
-  }, [userID]);
+  }, []);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -70,20 +75,20 @@ const ApplicationBox = () => {
       currentDate < startTime ||
       (currentDate >= startTime && currentDate <= endTime)
     );
-  }) 
+  });
 
   const pastApplication = (applications || []).filter((application) => {
     const currentDate = new Date();
     const endTime = new Date(application.endTime);
     return currentDate > endTime;
-  }) 
+  });
 
   return (
     <div className="p-4 md:p-6 bg-white">
-      <h2 className="text-2xl font-bold text-gray-900">Applications</h2>
+      <h2 className="text-2xl font-bold text-gray-900">All Events</h2>
       {loading ? (
         <div className="mt-4 p-6 text-center text-gray-500">
-          Loading applications...
+          Loading events...
         </div>
       ) : (
         <div className="mt-4 border shadow-sm">
@@ -96,7 +101,7 @@ const ApplicationBox = () => {
                   : "text-gray-500"
               }`}
             >
-              Current Applications
+              Current Events
             </button>
             <button
               onClick={() => setActiveTab("past")}
@@ -106,7 +111,7 @@ const ApplicationBox = () => {
                   : "text-gray-500"
               }`}
             >
-              Past Applications
+              Past Events
             </button>
           </div>
 
@@ -115,9 +120,10 @@ const ApplicationBox = () => {
               currentApplication.length > 0 ? (
                 <div className="space-y-4 text-left">
                   {currentApplication.map((application, key) => (
-                    <div
+                    <Link
                       key={key}
-                      className="flex flex-col md:flex-row items-start gap-10 border rounded-lg p-4 w-full"
+                      href={`/organization/eventDetail?applicationId=${application.id}`}
+                      className="flex flex-col md:flex-row items-start gap-10 border rounded-lg p-4 w-full hover:bg-gray-100 transition"
                     >
                       {/* Event image */}
                       <Image
@@ -133,7 +139,9 @@ const ApplicationBox = () => {
                         <h3 className="font-semibold text-lg">
                           {application.title}
                         </h3>
-                        <p className="font-extralight text-sm">{application.name}</p>
+                        <p className="font-extralight text-sm">
+                          {application.name}
+                        </p>
                         {/* Date with calendar icon */}
                         <p className="flex items-center gap-1 text-sm text-gray-600 ">
                           <CalendarDaysIcon className="h-4 w-4 " />
@@ -167,16 +175,18 @@ const ApplicationBox = () => {
                           }`}
                           variant={"outline"}
                         >
-                          {application.status === "PENDING_APPROVAL" ? "PENDING" : application.status}
+                          {application.status === "PENDING_APPROVAL"
+                            ? "PENDING"
+                            : application.status}
                         </Badge>
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               ) : (
                 <>
                   <p className="text-lg font-semibold">
-                    You don&apos;t have any applications
+                    You don’t have any current or upcoming events.
                   </p>
                   <p className="text-gray-500">
                     When you apply for any event, you can track your application
@@ -187,9 +197,10 @@ const ApplicationBox = () => {
             ) : pastApplication.length > 0 ? (
               <div className="space-y-4 text-left">
                 {pastApplication.map((application, key) => (
-                  <div
+                  <Link
                     key={key}
-                    className="flex flex-col md:flex-row items-start gap-10 border rounded-lg p-4 w-full"
+                    href={`/organization/eventDetail?applicationId=${application.id}`}
+                    className="flex flex-col md:flex-row items-start gap-10 border rounded-lg p-4 w-full hover:bg-gray-100 transition"
                   >
                     <Image
                       src={application.imageUrl}
@@ -223,17 +234,17 @@ const ApplicationBox = () => {
                         {application.status}
                       </Badge>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             ) : (
               <>
                 <p className="text-lg font-semibold">
-                  You don&apos;t have any past applications
+                  You don't have any past events
                 </p>
                 <p className="text-gray-500">
-                  When you apply for any event, you can track your application
-                  status here.
+                  Once the event you applied is no longer upcoming, it will be
+                  appear here.
                 </p>
               </>
             )}
@@ -244,4 +255,4 @@ const ApplicationBox = () => {
   );
 };
 
-export default ApplicationBox;
+export default AllEvents;

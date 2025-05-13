@@ -2,14 +2,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
-  const userID = req.nextUrl.searchParams.get('userID');
+  const organizerId = req.nextUrl.searchParams.get('organizerId');
 
-  if (!userID) {
+  if (!organizerId) {
     return NextResponse.json({ error: 'Missing userID' }, { status: 400 });
   }
 
   try {
-    const response = await fetch(`http://localhost:3001/getEventApplicationDetails/${userID}`);
+    const response = await fetch(`http://localhost:3001/getEventApplicationByOrganizer/${organizerId}`);
     if (!response.ok) {
       throw new Error(`Failed to fetch: ${response.status}`);
     }
@@ -17,6 +17,6 @@ export async function GET(req: NextRequest) {
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return NextResponse.json({ error: error }, { status: 500 });
   }
 }

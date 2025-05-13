@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 
 const BACKEND_URL = "http://localhost:3001";
 
-export async function PUT(req: NextRequest, context: { params: { id: string } }) {
-  const id = context.params.id;
+export async function PUT(req: NextRequest) {
+  const id = req.nextUrl.pathname.split("/").pop();
   const body = await req.json();
+
+  if (!id) {
+    return NextResponse.json({ error: "Missing ID" }, { status: 400 });
+  }
 
   try {
     const res = await fetch(`${BACKEND_URL}/organizers/${id}`, {
@@ -19,7 +23,6 @@ export async function PUT(req: NextRequest, context: { params: { id: string } })
 
     return NextResponse.json({ success: true, organizer: data.organizer });
   } catch (err) {
-    console.error("Organizer PUT error:", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: err}, { status: 500 });
   }
 }

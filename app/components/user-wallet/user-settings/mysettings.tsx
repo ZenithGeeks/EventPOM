@@ -20,7 +20,7 @@ const SettingsComponent: React.FC<SettingsComponentProps> = ({ onSave, onDeleteA
       </div>
       <div className="flex flex-col">
         <div className="mb-4">
-          <img
+          <Image
             src={session?.user?.image || "/default-profile.jpg"}
             alt="Profile"
             className="w-32 h-32 rounded-full mb-2"
