@@ -19,6 +19,6 @@ export async function POST(req: Request) {
 
         return NextResponse.json({ success: true, order: data.newOrder }, { status: 201 })
     } catch (error) {
-        return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
+        return NextResponse.json({ success: false, error: error}, { status: 500 })
     }
 }

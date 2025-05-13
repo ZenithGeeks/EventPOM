@@ -70,9 +70,8 @@ export default function OrganizationPage() {
             </div>
           ) : (
             <>
-              {activeTab === "Dashboard" && <OrganizationDashboard />}
+              {activeTab === "Dashboard" && <OrganizationDashboard organizerId={organizerId} />}
               {activeTab === "All Events" && <AllEvents organizerId={organizerId}/>}
-
               {activeTab === "Event Details" && (
                 <div>
                   <h1 className="text-2xl font-bold">Event Details</h1>
