@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { InputFile } from "@/components/ui/inputfile";
 
 interface SettingsComponentProps {
   onSave: () => void;
@@ -12,7 +13,8 @@ interface SettingsComponentProps {
 
 const SettingsComponent: React.FC<SettingsComponentProps> = ({ onSave, onDeleteAccount }) => {
   const { data: session } = useSession();
-  
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
   return (
     <div className="p-6 bg-white border rounded-lg shadow-md">
       <div className="mb-4">
@@ -21,16 +23,22 @@ const SettingsComponent: React.FC<SettingsComponentProps> = ({ onSave, onDeleteA
       <div className="flex flex-col">
         <div className="mb-4">
           <Image
-            src={session?.user?.image || "/default-profile.jpg"}
+            src={previewUrl || session?.user?.image || "/default-profile.jpg"}
             alt="Profile"
             width={96}
             height={96}
-            className="w-32 h-32 rounded-full mb-2"
+            className="w-32 h-32 rounded-full mb-2 object-cover"
           />
-          <Button variant="link" className="text-blue-500 underline p-0">
-            Upload Profile Picture
-          </Button>
-          <input type="file" accept="image/*" className="hidden" />
+          <InputFile
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                const url = URL.createObjectURL(file);
+                setPreviewUrl(url);
+              }
+            }}
+          />
+
         </div>
         <div className="flex flex-col md:flex-row md:space-x-4 mb-4">
           <div className="md:w-1/2">
@@ -91,7 +99,7 @@ const SettingsComponent: React.FC<SettingsComponentProps> = ({ onSave, onDeleteA
                   <SelectValue placeholder="Year" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Array.from({ length: 13 }, (_, i) => 1990 + i).map((year) => (
+                  {Array.from({ length: 126 }, (_, i) => 1900 + i).map((year) => (
                     <SelectItem key={year} value={year.toString()}>
                       {year}
                     </SelectItem>
