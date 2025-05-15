@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDaysIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 
 export type ApplicationInfo = {
@@ -29,9 +28,9 @@ const AllEvents = ({ organizerId }: { organizerId: string }) => {
           `/api/eventApplication?organizerId=${organizerId}`
         );
         const data = await res.json();
-
+        
         setApplications(data.eventApplicationDetails);
-        console.log(applications);
+        console.log(data);
       } catch (err) {
         console.error("Error fetching applications:", err);
       } finally {
@@ -40,7 +39,7 @@ const AllEvents = ({ organizerId }: { organizerId: string }) => {
     };
 
     fetchApplications();
-  }, []);
+  }, [applications, organizerId]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -240,7 +239,7 @@ const AllEvents = ({ organizerId }: { organizerId: string }) => {
             ) : (
               <>
                 <p className="text-lg font-semibold">
-                  You don't have any past events
+                  You don&apos;t have any past events
                 </p>
                 <p className="text-gray-500">
                   Once the event you applied is no longer upcoming, it will be
