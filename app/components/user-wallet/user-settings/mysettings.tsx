@@ -18,7 +18,7 @@ const SettingsComponent: React.FC<SettingsComponentProps> = ({ onSave, onDeleteA
   return (
     <div className="p-6 bg-white border rounded-lg shadow-md">
       <div className="mb-4">
-        <h2 className="text-2xl font-bold text-indigo-700">User Settings</h2>
+        <h2 className="text-2xl font-bold text-[#2A2A6D]">User Settings</h2>
       </div>
       <div className="flex flex-col">
         <div className="mb-4">
@@ -38,7 +38,6 @@ const SettingsComponent: React.FC<SettingsComponentProps> = ({ onSave, onDeleteA
               }
             }}
           />
-
         </div>
         <div className="flex flex-col md:flex-row md:space-x-4 mb-4">
           <div className="md:w-1/2">
@@ -131,7 +130,7 @@ const SettingsComponent: React.FC<SettingsComponentProps> = ({ onSave, onDeleteA
         <Button onClick={onDeleteAccount} variant="destructive" className="hover:bg-black hover:text-white">
           Delete Account
         </Button>
-        <Button onClick={onSave} variant="default" className="bg-indigo-700 text-white w-[240px]">
+        <Button onClick={onSave} variant="default" className="bg-[#2A2A6D] text-white w-[240px]">
           SAVE
         </Button>
       </div>
