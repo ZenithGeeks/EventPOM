@@ -28,9 +28,7 @@ const AllEvents = ({ organizerId }: { organizerId: string }) => {
           `/api/eventApplication?organizerId=${organizerId}`
         );
         const data = await res.json();
-        
         setApplications(data.eventApplicationDetails);
-        console.log(data);
       } catch (err) {
         console.error("Error fetching applications:", err);
       } finally {
@@ -39,7 +37,7 @@ const AllEvents = ({ organizerId }: { organizerId: string }) => {
     };
 
     fetchApplications();
-  }, [applications, organizerId]);
+  }, [organizerId]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);

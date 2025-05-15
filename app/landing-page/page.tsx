@@ -49,7 +49,6 @@ const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
   setShowSuggestions(false);
 };
 
-
   return (
     <div className="bg-white min-h-screen overflow-auto">
       <HeroSlider />

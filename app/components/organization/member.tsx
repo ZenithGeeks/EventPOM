@@ -284,7 +284,7 @@ export default function Member({ organizerId }: MemberProps) {
                     <TableCell>
                       <div className="flex items-center space-x-2">
                         <Image
-                          src={user.image ?? "/default-avatar.png"}
+                          src={user.image && user.image.trim() !== "" ? user.image : "/default-avatar.png"}
                           alt={user.name ?? ""}
                           width={32}
                           height={32}
@@ -342,7 +342,6 @@ export default function Member({ organizerId }: MemberProps) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="USER">USER</SelectItem>
-                  <SelectItem value="ADMIN">ADMIN</SelectItem>
                   <SelectItem value="ORGANIZER">ORGANIZER</SelectItem>
                   <SelectItem value="ORGANIZER_STAFF">STAFF</SelectItem>
                 </SelectContent>
