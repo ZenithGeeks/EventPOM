@@ -1,36 +1,33 @@
-"use client"
+"use client";
 
-import { Bar, BarChart } from "recharts"
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, CartesianGrid } from "recharts";
 
-import { ChartConfig, ChartContainer } from "@/components/ui/chart"
+interface ChartEntry {
+  label: string;
+  ticketsSold: number;
+  attendees: number;
+}
 
-const chartData = [
-  { month: "January", desktop: 186, mobile: 80 },
-  { month: "February", desktop: 305, mobile: 200 },
-  { month: "March", desktop: 237, mobile: 120 },
-  { month: "April", desktop: 73, mobile: 190 },
-  { month: "May", desktop: 209, mobile: 130 },
-  { month: "June", desktop: 214, mobile: 140 },
-]
-
-const chartConfig = {
-  desktop: {
-    label: "Desktop",
-    color: "#2563eb",
-  },
-  mobile: {
-    label: "Mobile",
-    color: "#60a5fa",
-  },
-} satisfies ChartConfig
-
-export function ChartComponent() {
+export function ChartComponent({ data }: { data: ChartEntry[] }) {
   return (
-    <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
-      <BarChart accessibilityLayer data={chartData}>
-        <Bar dataKey="desktop" fill="var(--color-desktop)" radius={4} />
-        <Bar dataKey="mobile" fill="var(--color-mobile)" radius={4} />
-      </BarChart>
-    </ChartContainer>
-  )
+    <div className="w-full min-h-[250px]">
+      {data.length === 0 ? (
+        <div className="text-center text-muted-foreground py-10 text-sm">
+          No ticket or attendance data to display.
+        </div>
+      ) : (
+        <ResponsiveContainer width="100%" height={250}>
+          <BarChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="label" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="ticketsSold" fill="#3B82F6" name="Tickets Sold" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="attendees" fill="#10B981" name="Attendees" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      )}
+    </div>
+  );
 }
