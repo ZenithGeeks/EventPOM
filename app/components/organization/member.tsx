@@ -76,7 +76,7 @@ export default function Member({ organizerId }: MemberProps) {
         setUsers(orgData.users);
 
         const orgEmails = new Set(orgData.users.map((u) => u.email));
-        const notInOrg = allData.users.filter((u) => !orgEmails.has(u.email));
+        const notInOrg = allData.users?.filter((u) => !orgEmails.has(u.email));
         setEligibleUsers(notInOrg);
       } catch (err) {
         console.error("Failed to fetch users", err);
@@ -123,7 +123,6 @@ export default function Member({ organizerId }: MemberProps) {
     }
   };
 
-
   const handleAddMember = async (userId: string) => {
     setDialogAddMemberOpen(false);
 
@@ -147,15 +146,13 @@ export default function Member({ organizerId }: MemberProps) {
   };
 
   const filteredUsers = users
-    .filter((user) =>
+    ?.filter((user) =>
       searchQuery
         ? user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
           user.email.toLowerCase().includes(searchQuery.toLowerCase())
         : true
     )
-    .sort((a, b) =>
-      sortByRole ? a.role.localeCompare(b.role) : 0
-    );
+    .sort((a, b) => (sortByRole ? a.role.localeCompare(b.role) : 0));
 
   if (loading) {
     return (
@@ -226,7 +223,10 @@ export default function Member({ organizerId }: MemberProps) {
             </Select>
 
             <DialogFooter className="mt-4">
-              <Button variant="outline" onClick={() => setDialogAddMemberOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setDialogAddMemberOpen(false)}
+              >
                 Cancel
               </Button>
               <Button onClick={() => handleAddMember(member)}>Save</Button>
@@ -294,22 +294,20 @@ export default function Member({ organizerId }: MemberProps) {
                     </TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={
-                            user.role === "ADMIN"
-                              ? "bg-green-100 text-green-800"
-                              : user.role === "ORGANIZER"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : user.role === "ORGANIZER_STAFF"
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-gray-100 text-gray-800"
-                          }
-                        >
-                          {user.role}
-                        </Badge>
-                      </TableCell>
+                      <Badge
+                        variant="outline"
+                        className={
+                          user.role === "ADMIN"
+                            ? "bg-green-100 text-green-800"
+                            : user.role === "ORGANIZER"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : user.role === "ORGANIZER_STAFF"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-gray-100 text-gray-800"
+                        }
+                      >
+                        {user.role}
+                      </Badge>
                     </TableCell>
                     <TableCell>
                       <Button
