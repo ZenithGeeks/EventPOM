@@ -1,4 +1,4 @@
-// app/api/uploadPoster/route.ts
+// /app/api/uploadPoster/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
@@ -11,11 +11,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     const uploadForm = new FormData();
-    uploadForm.append("file", file); // ✅ field name matches `UploadFileModel`
+    uploadForm.append("file", file);
 
     const uploadRes = await fetch(`${process.env.BACKEND_URL}/upload/`, {
       method: "POST",
-      body: uploadForm, // ✅ native browser FormData
+      body: uploadForm,
     });
 
     const result = await uploadRes.json();

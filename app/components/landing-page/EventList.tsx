@@ -29,7 +29,7 @@ const EventList: React.FC<EventListProps> = ({ filteredEvents = [] }) => {
             </div>
             <div className="p-2">
               <Link href={`/buyTicketsPage/${event.id}`}>
-                <h3 className="text-md font-semibold">{event.title}</h3>
+                <h3 className="text-md font-semibold duration-300 hover:text-red-500">{event.title}</h3>
               </Link>
               <p className="text-sm text-gray-600 flex items-center">
                 <MapPinIcon className="w-4 h-4 mr-1" />
