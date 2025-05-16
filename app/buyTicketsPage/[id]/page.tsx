@@ -39,6 +39,15 @@ interface orderData {
     ticketPrices: { [key: string]: number }
 }
 
+interface paymentData {
+    userId: string
+    orderId: string
+    amount: number
+    paymentMethod: string
+    status: 'PENDING' | 'SUCCESS' | 'FAILED'
+    transactionId: string
+}
+
 export default function Buy() {
     const { id } = useParams()
     const [loading, setLoading] = useState<boolean>(false)
@@ -56,6 +65,14 @@ export default function Buy() {
         ticketCount: ticketCount,
         ticketPrices: ticketPrices
     })
+    const paymentData: paymentData = {
+        userId: '',
+        orderId: '',
+        amount: 0,
+        paymentMethod: '',
+        status: 'PENDING',
+        transactionId: ''
+    }
     const cartLength = cartItems.length
     const total = cartItems.reduce((sum: any, item: any) => sum + item.price * ticketCount[item.id], 0)
     const { data: session } = useSession()
@@ -142,15 +159,22 @@ export default function Buy() {
                 setLoading(true)
                 const res = await fetch('/api/charge', {
                     method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token, amount: total })
                 })
                 const result = await res.json()
 
                 if (result.success) {
+                    paymentData.userId = session?.user.id ? session?.user.id : '',
+                    paymentData.transactionId = result.charge.id
+                    paymentData.amount = result.charge.amount / 100
+                    paymentData.paymentMethod = result.charge.card ? 'Credit card' : result.charge.source.type ? result.charge.source.type : 'Online payment'
+                    paymentData.status = result.charge.status == 'successful' ? 'SUCCESS' : 'PENDING'
                     resetTicketCount()
                     order(orderData)
                     toast.success('Payment successful', { id: toastID })
                 } else {
+                    console.log(result)
                     toast.error('Payment failed', { id: toastID })
                 }
 
@@ -204,6 +228,24 @@ export default function Buy() {
             toast.error('Cannot load ticket information from the database')
         }
     }
+    const payment = async (paymentData: paymentData) => {
+        try {
+            console.log(paymentData)
+            const res = await fetch(`/api/createPayment`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    paymentData
+                })
+            })
+            const result = await res.json()
+
+            if (!res.ok) {
+                throw new Error(result.error || 'An unknown error occurred')
+            }
+        } catch (error) {
+            // toast.error('Cannot place payment data')
+        }
+    }
     const order = async (orderData: orderData) => {
         try {
             const res = await fetch(`/api/order`, {
@@ -213,9 +255,13 @@ export default function Buy() {
                 })
             })
             const result = await res.json()
+            console.log(result)
 
             if (!res.ok) {
                 throw new Error(result.error || 'An unknown error occurred')
+            } else {
+                paymentData.orderId = result.id
+                payment(paymentData)
             }
         } catch (error) {
             toast.error('Cannot place order')
