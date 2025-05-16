@@ -56,7 +56,7 @@ export default function Member({ organizerId }: MemberProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogAddMemberOpen, setDialogAddMemberOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortByRole, setSortByRole] = useState(false);
+  const [sortByRole, setSortByRole] = useState("ALL");
   const [member, setMember] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
@@ -123,6 +123,25 @@ export default function Member({ organizerId }: MemberProps) {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    const confirmed = confirm("Are you sure you want to delete this user?");
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`/api/users/${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        setUsers((prev) => prev.filter((u) => u.id !== id));
+      } else {
+        toast.error("Failed to delete user");
+      }
+    } catch (err) {
+      console.error("Error deleting user:", err);
+    }
+  };
+
   const handleAddMember = async (userId: string) => {
     setDialogAddMemberOpen(false);
 
@@ -152,7 +171,7 @@ export default function Member({ organizerId }: MemberProps) {
           user.email.toLowerCase().includes(searchQuery.toLowerCase())
         : true
     )
-    .sort((a, b) => (sortByRole ? a.role.localeCompare(b.role) : 0));
+    .filter((user) => (sortByRole === "ALL" ? true : user.role === sortByRole));
 
   if (loading) {
     return (
@@ -253,14 +272,27 @@ export default function Member({ organizerId }: MemberProps) {
               className="h-10 w-[250px] border border-gray-300 rounded-md px-4"
             />
             <Select
-              value={sortByRole ? "role" : ""}
-              onValueChange={(value) => setSortByRole(value === "role")}
+              value={sortByRole || ""}
+              onValueChange={(value) =>
+                setSortByRole(
+                  value as
+                    | ""
+                    | "USER"
+                    | "ADMIN"
+                    | "ORGANIZER"
+                    | "ORGANIZER_STAFF"
+                )
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Sort by role" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="role">Role</SelectItem>
+                <SelectItem value="ALL">All Roles</SelectItem>
+                <SelectItem value="ADMIN">Admin</SelectItem>
+                <SelectItem value="ORGANIZER">Organizer</SelectItem>
+                <SelectItem value="ORGANIZER_STAFF">Staff</SelectItem>
+                <SelectItem value="USER">User</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -277,51 +309,58 @@ export default function Member({ organizerId }: MemberProps) {
           </TableHeader>
           <TableBody>
             <AnimatePresence>
-              {filteredUsers.map((user) => (
-                <Fragment key={user.id}>
-                  <TableRow>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <Image
-                          src={user.image && user.image.trim() !== "" ? user.image : "/default-avatar.png"}
-                          alt={user.name ?? ""}
-                          width={32}
-                          height={32}
-                          className="rounded-full"
-                        />
-                        <span>{user.name}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={
-                          user.role === "ADMIN"
-                            ? "bg-green-100 text-green-800"
-                            : user.role === "ORGANIZER"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : user.role === "ORGANIZER_STAFF"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-gray-100 text-gray-800"
-                        }
-                      >
-                        {user.role}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleEdit(user)}
-                      >
-                        <Pencil className="mr-2 h-4 w-4" />
-                        Edit
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                </Fragment>
-              ))}
+              {filteredUsers.map((user) =>
+                user ? (
+                  <Fragment key={user.id}>
+                    <TableRow>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <Image
+                            src={
+                              typeof user.image === "string" &&
+                              user.image.trim() !== ""
+                                ? user.image
+                                : "/default-avatar.png"
+                            }
+                            alt={user.name ?? ""}
+                            width={32}
+                            height={32}
+                            className="rounded-full"
+                          />
+                          <span>{user.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={
+                            user.role === "ADMIN"
+                              ? "bg-green-100 text-green-800"
+                              : user.role === "ORGANIZER"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : user.role === "ORGANIZER_STAFF"
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-gray-100 text-gray-800"
+                          }
+                        >
+                          {user.role == "ORGANIZER_STAFF" ? "Staff" : user.role}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEdit(user)}
+                        >
+                          <Pencil className="mr-2 h-4 w-4" />
+                          Edit
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  </Fragment>
+                ) : null
+              )}
             </AnimatePresence>
           </TableBody>
         </Table>
